@@ -436,7 +436,7 @@ Este projeto está licenciado conforme o arquivo **LICENSE**.
 
 # Autor
 
-**Henry Martins**
+**Henry M Jr**
 
 Analista de Sistemas | Cyber Security | DevSecOps | Software Architecture
 
