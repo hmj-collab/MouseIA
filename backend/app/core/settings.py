@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     app_name: str = "MouseIA"
     app_environment: str = "development"
     debug: bool = True
-    database_url: str = "sqlite:///./mouseia.db"
+    database_url: str = "sqlite:///./data/mouseia.db"
     jwt_secret_key: str = "dev-secret-key-change-me-in-production"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

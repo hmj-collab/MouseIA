@@ -1,140 +1,443 @@
 # Mouse IA
 
-Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto já passou da fase conceitual para uma base funcional de backend, com os módulos de Sites, Signals e Findings e a primeira camada de autenticação e autorização.
+> **Attack Surface Management (ASM) • Vulnerability Management (VM) • Threat Intelligence • AI Security Analytics**
 
-## Status atual
+Mouse IA é uma plataforma profissional para descoberta, análise, correlação e gestão inteligente de vulnerabilidades em ativos digitais.
 
-A base do projeto está totalmente operacional localmente e com migrações de banco alinhadas:
+Diferente de ferramentas tradicionais de segurança, o Mouse IA não pretende substituir scanners especializados como **Nmap**, **Nuclei**, **WPScan** ou **WhatWeb**.
 
-- Backend FastAPI com endpoint de saúde
-- CRUD de Empresas (`Companies`) com permissões `admin`/`viewer`
-- CRUD de Sites com persistência em SQLite
-- CRUD de Ativos (`Assets`) e Varreduras (`Scans`)
-- Motor de varredura síncrono que analisa alvos HTTP, vazamento de cabeçalhos e tecnologias (WordPress)
-- Geração automática encadeada no pipeline: Scan ➔ Signals ➔ Findings
-- Criação e consulta de Signals associados a Sites
-- Criação e consulta de Findings associados a Signals
-- Integração robusta com SQLAlchemy e migrações do Alembic (suporte a batch mode para SQLite)
-- Autenticação JWT e autorização por cargo (`admin` e `viewer`)
-- Frontend completo e moderno (Single Page Application) em Vite + React + Lucide Icons, integrado com o backend (Dashboard, Escopo, Varreduras e Ameaças)
-- 20 testes automatizados cobrindo saúde, autenticação, autorização, Sites, Usuários, Empresas, Ativos, Scans, Sinais e Achados.
+Seu objetivo é orquestrar essas ferramentas, normalizar evidências técnicas, correlacionar informações, enriquecer resultados utilizando Threat Intelligence e Inteligência Artificial e transformar milhares de dados técnicos em decisões acionáveis para equipes de Cyber Security, DevSecOps, Infraestrutura e Desenvolvimento.
 
-## Visão geral
+---
 
-A proposta do Mouse IA é apoiar equipes de segurança com:
+# Status do Projeto
 
-- cadastro e gestão de ativos digitais
-- coleta e organização de sinais e evidências
-- correlação de risco e contexto operacional
-- geração de achados, vulnerabilidades e recomendações
-- acompanhamento de ações de remediação
+**Versão:** v0.1 — Foundation
 
-O fluxo principal segue a direção:
+**Situação:**
 
-Asset → Scan → Signals → Correlation Engine → Findings → Vulnerabilities → Recommendations → Tasks
+- ✅ Arquitetura definida
+- ✅ Backend FastAPI
+- ✅ Frontend React + Vite
+- ✅ Autenticação JWT
+- ✅ Organizations
+- ✅ Projects
+- ✅ Assets
+- ✅ Scan Pipeline Inicial
+- 🚧 Scan Engine Modular
+- 🚧 Threat Intelligence
+- 🚧 Correlation Engine
+- 🚧 AI Engine
+- 🚧 Dashboard Executivo
 
-## Requisitos do projeto
+---
 
-- Python 3.9 ou superior
-- ambiente virtual com venv
-- pip
-- SQLite para desenvolvimento local
-- PostgreSQL como alvo de produção futuro
+# Visão
 
-## Stack atual
+O Mouse IA foi projetado para ser uma plataforma Enterprise capaz de acompanhar todo o ciclo de vida da gestão de vulnerabilidades.
 
-- FastAPI para APIs
-- Pydantic para validação de dados
-- SQLAlchemy para camada de persistência
-- Alembic para migrações
-- pytest para testes automatizados
-- Uvicorn para execução local
+Seu fluxo principal é composto por:
 
-## Como executar localmente
+```text
+Organization
+      │
+      ▼
+ Project
+      │
+      ▼
+  Asset
+      │
+      ▼
+ Scan Engine
+      │
+      ▼
+ Providers
+      │
+      ▼
+ Signals
+      │
+      ▼
+Correlation Engine
+      │
+      ▼
+ Findings
+      │
+      ▼
+Threat Intelligence
+      │
+      ▼
+Vulnerabilities
+      │
+      ▼
+ AI Engine
+      │
+      ▼
+Recommendations
+      │
+      ▼
+   Tasks
+      │
+      ▼
+  Reports
+```
 
-1. Entre na pasta do backend.
-2. Crie e ative um ambiente virtual.
-3. Instale as dependências necessárias.
-4. Aplique as migrações.
-5. Execute a aplicação localmente.
+---
 
-Exemplo prático:
+# Principais Recursos
+
+## Gestão
+
+- Organizations
+- Projects
+- Assets
+- Usuários
+- Permissões
+- RBAC
+
+---
+
+## Scan Engine
+
+Motor responsável pela orquestração dos scanners.
+
+Suporte planejado para:
+
+- HTTPX
+- Nmap
+- Nuclei
+- WhatWeb
+- WPScan
+- Katana
+- Naabu
+- DNSX
+- SSLyze
+- TestSSL
+- Nikto
+- CMSeeK
+
+---
+
+## Correlation Engine
+
+Responsável por transformar Signals em Findings.
+
+---
+
+## Threat Intelligence
+
+Integração planejada com:
+
+- NVD
+- CISA KEV
+- EPSS
+- OSV
+- GitHub Advisories
+- WordPress.org
+- VulnCheck
+- OTX
+
+---
+
+## Artificial Intelligence
+
+A IA será responsável por:
+
+- Priorização de riscos
+- Explicação de vulnerabilidades
+- Recomendações
+- Identificação de possíveis falsos positivos
+- Resumos executivos
+- Apoio à tomada de decisão
+
+---
+
+## Dashboard
+
+Planejado para oferecer:
+
+- Dashboard Executivo
+- Dashboard Técnico
+- Histórico
+- Evolução
+- Tendências
+- KPIs
+
+---
+
+# Arquitetura
+
+O Mouse IA utiliza uma arquitetura modular baseada em Clean Architecture.
+
+```text
+Frontend
+
+↓
+
+API
+
+↓
+
+Application
+
+↓
+
+Domain
+
+↓
+
+Infrastructure
+
+↓
+
+Providers
+
+↓
+
+Threat Intelligence
+
+↓
+
+Artificial Intelligence
+```
+
+Toda regra de negócio permanece desacoplada das ferramentas externas.
+
+---
+
+# Tecnologias
+
+## Backend
+
+- Python
+- FastAPI
+- SQLAlchemy
+- Alembic
+- Pydantic
+
+---
+
+## Banco de Dados
+
+- PostgreSQL (Produção)
+- SQLite (Desenvolvimento)
+
+---
+
+## Frontend
+
+- React
+- Vite
+- Tailwind CSS
+
+---
+
+## Infraestrutura
+
+- Docker
+- Redis
+- Celery
+
+---
+
+## Testes
+
+- Pytest
+
+---
+
+# Instalação
+
+## Backend
 
 ```bash
 cd backend
+
 python3 -m venv .venv
+
 source .venv/bin/activate
-pip install fastapi "uvicorn[standard]" pydantic-settings httpx sqlalchemy alembic pytest pytest-cov psycopg2-binary
+
+pip install -r requirements.txt
+
 alembic upgrade head
+
 uvicorn app.main:app --reload
 ```
 
-Em outro terminal, a interface de teste pode ser executada em `http://127.0.0.1:3000`:
+---
+
+## Frontend
 
 ```bash
 cd frontend
-npm start
+
+npm install
+
+npm run dev
 ```
 
-Para o ambiente local, use `admin` ou `viewer` com a senha `password123` para obter um token. Essas credenciais são apenas de desenvolvimento.
+---
 
-## Estrutura do repositório
+# Estrutura do Projeto
 
 ```text
-backend/
-  app/
-    api/
-    core/
-    database/
-    models/
-    repositories/
-    schemas/
-    services/
-  alembic/
-  tests/
-frontend/
-  index.html
-  package.json
-docs/
-scripts/
+MouseIA/
+
+├── backend/
+│   ├── app/
+│   │   ├── api/
+│   │   ├── core/
+│   │   ├── database/
+│   │   ├── models/
+│   │   ├── repositories/
+│   │   ├── schemas/
+│   │   ├── services/
+│   │   ├── scanners/
+│   │   ├── workers/
+│   │   ├── ai/
+│   │   └── utils/
+│   ├── alembic/
+│   └── tests/
+│
+├── frontend/
+│
+├── docs/
+│
+├── scripts/
+│
+├── tasks/
+│
+├── LICENSE
+│
+└── README.md
 ```
 
-## Módulos em evolução
+---
 
-### Módulo de Sites
+# Roadmap
 
-Já implementado em sua primeira versão funcional com CRUD, persistência, autenticação e testes.
+## v0.1
 
-### Módulos de Signals e Findings
+Foundation
 
-Implementados em sua primeira versão com criação, consulta, persistência e vínculo opcional com Site e Signal, respectivamente. A correlação automática entre eles continua como evolução futura.
+- Plataforma Base
+- Backend
+- Frontend
+- Organizations
+- Projects
+- Assets
 
-### Próximos módulos previstos
+---
 
-- Empresas
-- Ativos
-- Scans
-- Vulnerabilidades
-- Recomendações
-- Tarefas
+## v0.2
 
-## Documentação relacionada
+Scan Platform
 
-- [ARCHITECTURE.md](ARCHITECTURE.md): visão técnica e arquitetura da solução
-- [ROADMAP.md](ROADMAP.md): evolução do projeto por fases
-- [SECURITY.md](SECURITY.md): diretrizes de segurança
-- [SIGNALS.md](SIGNALS.md): fluxo conceitual de sinais e análise
-- [CHANGELOG.md](CHANGELOG.md): histórico de mudanças
+- Scan Engine
+- Scheduler
+- Providers
 
-## Próximos passos
+---
 
-As próximas etapas prioritárias são:
+## v0.3
 
-- construir um frontend integrado completo (Vite + React) no diretório `/frontend`
-- implementar o motor de correlação (Fase 3) conectando achados a bases de vulnerabilidades (CVE/NVD)
-- adicionar filtros e paginação avançados nas APIs de Sinais e Achados
-- introduzir suporte assíncrono para scans pesados por meio de filas (Celery/Redis)
+Threat Intelligence
 
-## Licença
+- Correlation Engine
+- Vulnerability Intelligence
+- Risk Score
 
-Este projeto está sob a licença definida no arquivo LICENSE.
+---
+
+## v0.4
+
+Artificial Intelligence
+
+- AI Engine
+- Recommendations
+- False Positive Analysis
+
+---
+
+## v0.5
+
+Reporting
+
+- Dashboard Executivo
+- Dashboard Técnico
+- Relatórios
+- Exportações
+
+---
+
+## v1.0
+
+Enterprise Ready
+
+- API Pública
+- Multiempresa
+- Escalabilidade
+- Documentação Completa
+- Alta Disponibilidade
+
+---
+
+# Documentação
+
+Toda a documentação oficial encontra-se na pasta **docs/**.
+
+- ARCHITECTURE.md
+- AGENT.md
+- ROADMAP.md
+- SIGNALS.md
+- SECURITY.md
+- DECISIONS.md
+- CHANGELOG.md
+
+---
+
+# Filosofia
+
+O Mouse IA não busca possuir o maior número de funcionalidades.
+
+Seu objetivo é integrar ferramentas consolidadas de segurança em uma única plataforma capaz de transformar evidências técnicas em inteligência acionável.
+
+A plataforma foi projetada para ser:
+
+- Modular
+- Escalável
+- Segura
+- Extensível
+- Orientada a Dados
+- Preparada para Inteligência Artificial
+
+Toda evolução deverá preservar a arquitetura definida no projeto.
+
+---
+
+# Contribuindo
+
+Contribuições são bem-vindas.
+
+Antes de iniciar qualquer desenvolvimento:
+
+1. Leia `docs/AGENT.md`.
+2. Leia `docs/ARCHITECTURE.md`.
+3. Consulte `docs/ROADMAP.md`.
+4. Escolha uma Task correspondente à Release em desenvolvimento.
+5. Siga os padrões arquiteturais definidos para o projeto.
+
+---
+
+# Licença
+
+Este projeto está licenciado conforme o arquivo **LICENSE**.
+
+---
+
+# Autor
+
+**Henry Martins**
+
+Analista de Sistemas | Cyber Security | DevSecOps | Software Architecture
+
+Projeto desenvolvido com foco em criar uma plataforma moderna de gestão inteligente de vulnerabilidades, preparada para ambientes corporativos e evolução contínua.
