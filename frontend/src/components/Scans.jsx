@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   Play, RefreshCw, Trash2, Database, ShieldAlert, Plus, X, Globe,
-  Shield, CheckCircle, Clock, AlertTriangle, ExternalLink
+  Shield, CheckCircle, Clock, AlertTriangle, ExternalLink, Terminal
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -22,6 +22,7 @@ export default function Scans({ user }) {
 
   const [showScanModal, setShowScanModal] = useState(false);
   const [scanForm, setScanForm] = useState({ id: null, scan_type: 'wordpress', description: '', asset_id: '', site_id: '' });
+  const [selectedScanLogs, setSelectedScanLogs] = useState(null);
 
   const [activeTab, setActiveTab] = useState('scans'); // 'scans' or 'assets'
   const [error, setError] = useState('');
@@ -279,8 +280,18 @@ export default function Scans({ user }) {
                         <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                           {scan.started_at ? new Date(scan.started_at).toLocaleString() : <span style={{ color: 'var(--text-muted)' }}>Pendente</span>}
                         </td>
-                        <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {scan.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem logs</span>}
+                        <td>
+                          {scan.description ? (
+                            <button 
+                              className="secondary" 
+                              style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                              onClick={() => setSelectedScanLogs(scan.description)}
+                            >
+                              <Terminal size={12} style={{ color: 'var(--color-primary)' }} /> Ver Logs ({scan.description.split('\n').length} linhas)
+                            </button>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic', fontSize: '0.8rem' }}>Sem logs</span>
+                          )}
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -566,6 +577,55 @@ export default function Scans({ user }) {
                 <button type="submit" className="primary">Confirmar Agendamento</button>
               </div>
             </form>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {selectedScanLogs && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100
+        }}>
+          <div className="glass-card animate-fade-in" style={{
+            width: '90%', maxWidth: '750px', padding: '1.5rem', background: '#090d16', border: '1px solid rgba(59, 130, 246, 0.2)', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#ef4444', display: 'inline-block' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }}></span>
+                <span style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+                <h3 style={{ fontSize: '0.85rem', fontWeight: 600, marginLeft: '0.5rem', color: 'var(--text-secondary)', fontFamily: 'monospace', margin: 0 }}>scan_output.log</h3>
+              </div>
+              <button className="secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.75rem' }} onClick={() => setSelectedScanLogs(null)}>Fechar</button>
+            </div>
+            <div style={{
+              background: '#04060a',
+              padding: '1.25rem',
+              borderRadius: '6px',
+              maxHeight: '400px',
+              overflowY: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '0.8rem',
+              lineHeight: '1.5',
+              border: '1px solid rgba(255,255,255,0.03)',
+              textAlign: 'left'
+            }}>
+              {selectedScanLogs.split('\n').map((line, idx) => {
+                let color = '#e2e8f0'; // slate-200
+                if (line.includes('[ERROR]')) color = '#f87171'; // red-400
+                else if (line.includes('[WARNING]')) color = '#fbbf24'; // amber-400
+                else if (line.includes('[SUCCESS]')) color = '#34d399'; // emerald-400
+                else if (line.includes('[INFO]')) color = '#60a5fa'; // blue-400
+
+                return (
+                  <div key={idx} style={{ color, whiteSpace: 'pre-wrap' }}>
+                    {line}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>,
         document.body
