@@ -239,6 +239,52 @@ class ApiService {
       body: JSON.stringify(findingData),
     });
   }
+
+  // Vulnerabilities Endpoints
+  async getVulnerabilities(assetId = null) {
+    const query = assetId ? `?asset_id=${assetId}` : '';
+    return this.request(`/vulnerabilities${query}`);
+  }
+
+  async getVulnerability(id) {
+    return this.request(`/vulnerabilities/${id}`);
+  }
+
+  async updateVulnerability(id, vulnData) {
+    return this.request(`/vulnerabilities/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(vulnData),
+    });
+  }
+
+  async deleteVulnerability(id) {
+    return this.request(`/vulnerabilities/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Recommendations Endpoints
+  async getRecommendations(vulnerabilityId = null) {
+    const query = vulnerabilityId ? `?vulnerability_id=${vulnerabilityId}` : '';
+    return this.request(`/recommendations${query}`);
+  }
+
+  async getRecommendation(id) {
+    return this.request(`/recommendations/${id}`);
+  }
+
+  async updateRecommendation(id, recData) {
+    return this.request(`/recommendations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(recData),
+    });
+  }
+
+  async deleteRecommendation(id) {
+    return this.request(`/recommendations/${id}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const api = new ApiService();

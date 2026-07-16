@@ -290,6 +290,16 @@ class ScanService:
                 signal_id=sig.id
             )
             self.db.add(finding)
+            self.db.flush()  # populate finding.id
+
+            # Correlate finding into Vulnerability and Recommendation
+            try:
+                from app.services.correlation_service import CorrelationService
+                correlation_svc = CorrelationService(self.db)
+                correlation_svc.correlate_finding(finding, asset_id=scan.asset_id)
+                log("INFO", f"Enriquecimento de Ameaça: Achado '{finding.title}' correlacionado com sucesso.")
+            except Exception as e:
+                log("ERROR", f"Falha ao correlacionar achado '{finding.title}': {str(e)}")
 
         # 5. Finalize Scan and write formatted log string to description
         log("SUCCESS", "Varredura concluída com sucesso.")

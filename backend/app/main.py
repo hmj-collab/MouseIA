@@ -11,6 +11,8 @@ from app.api.scans import router as scans_router
 from app.api.signals import router as signals_router
 from app.api.sites import router as sites_router
 from app.api.users import router as users_router
+from app.api.vulnerabilities import router as vulnerabilities_router
+from app.api.recommendations import router as recommendations_router
 from app.core.security import get_current_user
 from app.core.settings import settings
 from app.database.session import Base, engine
@@ -48,6 +50,8 @@ app.include_router(users_router)
 app.include_router(companies_router)
 app.include_router(assets_router)
 app.include_router(scans_router)
+app.include_router(vulnerabilities_router)
+app.include_router(recommendations_router)
 
 
 @app.get("/health")

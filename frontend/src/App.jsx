@@ -10,10 +10,11 @@ import Dashboard from './components/Dashboard';
 import Sites from './components/Sites';
 import Scans from './components/Scans';
 import SignalsFindings from './components/SignalsFindings';
+import Vulnerabilities from './components/Vulnerabilities';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard', 'sites', 'scans', 'signals'
+  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard', 'sites', 'scans', 'signals', 'vulnerabilities'
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Check auth state on mount
@@ -95,6 +96,12 @@ function App() {
           >
             <Database size={16} /> Ameaças
           </button>
+          <button 
+            className={`nav-item ${currentTab === 'vulnerabilities' ? 'active' : ''}`}
+            onClick={() => setCurrentTab('vulnerabilities')}
+          >
+            <ShieldAlert size={16} /> Vulnerabilidades
+          </button>
         </nav>
 
         {/* User context menu */}
@@ -130,6 +137,9 @@ function App() {
         )}
         {currentTab === 'signals' && (
           <SignalsFindings user={user} />
+        )}
+        {currentTab === 'vulnerabilities' && (
+          <Vulnerabilities user={user} />
         )}
       </main>
 
