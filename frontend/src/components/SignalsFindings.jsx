@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { ShieldAlert, AlertTriangle, AlertCircle, RefreshCw, Server, HelpCircle, Eye } from 'lucide-react';
+import { ShieldAlert, AlertTriangle, AlertCircle, RefreshCw, Server, HelpCircle, Eye, X, AlertOctagon } from 'lucide-react';
 import api from '../services/api';
 
 export default function SignalsFindings({ user }) {

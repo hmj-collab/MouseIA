@@ -193,7 +193,7 @@ export default function Dashboard({ user, onNavigate }) {
         {/* Column 2: Recent Findings */}
         <div className="glass-card" style={{ padding: '1.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Últimos Achados Detectados</h3>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>Últimos Detectados</h3>
             <button className="secondary" onClick={() => onNavigate('signals')} style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}>Ver todos</button>
           </div>
           {stats.recentFindings.length === 0 ? (
