@@ -1,0 +1,71 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pdb
+*.egg-info/
+.venv/
+venv/
+ENV/
+.envrc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.ipynb_checkpoints/
+
+# FastAPI / Alembic / backend
+*.log
+logs/
+instance/
+*.sqlite3
+*.db
+*.db-journal
+alembic/versions/__pycache__/
+backend/.pytest_cache/
+backend/.mypy_cache/
+
+# Node / frontend
+node_modules/
+.next/
+out/
+dist/
+build/
+.npm/
+.pnpm-store/
+.eslintcache
+frontend/.next/
+frontend/node_modules/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary and generated files
+tmp/
+temp/
+tmpfiles/
+coverage/
+artifacts/
+
+# Docker
+docker-compose.override.yml
+*.local.yml
+
+# CI / automation
+.github/workflows/*.local.yml
