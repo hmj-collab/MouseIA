@@ -161,7 +161,7 @@ export default function Sites({ user }) {
               setSiteForm({ id: null, name: '', url: '', description: '', tags: '', company_id: '' });
               setShowSiteModal(true);
             }}>
-              <Plus size={18} /> Adicionar Site
+              <Plus size={18} /> Adicionar Assets
             </button>
             <button className="secondary" onClick={() => {
               setCompanyForm({ id: null, name: '', domain: '', description: '', is_active: true });
@@ -345,7 +345,7 @@ export default function Sites({ user }) {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                {siteForm.id ? 'Editar Site' : 'Adicionar Novo Site'}
+                {siteForm.id ? 'Editar Site' : 'Adicionar Novo Asset'}
               </h2>
               <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setShowSiteModal(false)}>
                 <X size={20} />
@@ -354,7 +354,7 @@ export default function Sites({ user }) {
             
             <form onSubmit={handleSiteSubmit}>
               <div className="form-group">
-                <label>Nome do Site</label>
+                <label>Nome do Asset</label>
                 <input
                   type="text"
                   placeholder="Ex: E-commerce Principal"

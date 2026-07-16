@@ -93,7 +93,7 @@ export default function Dashboard({ user, onNavigate }) {
             <Globe size={24} />
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Sites Cadastrados</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Assets</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>{stats.sites}</div>
           </div>
         </div>
@@ -130,7 +130,7 @@ export default function Dashboard({ user, onNavigate }) {
       </div>
 
       {/* Severities distribution row */}
-      <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Distribuição de Severidade dos Achados</h3>
+      <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Distribuição de Severidade</h3>
       <div className="grid-cols-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
         {severityData.map(item => {
           const count = stats.findingsBySeverity[item.key] || 0;

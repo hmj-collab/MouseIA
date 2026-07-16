@@ -2,7 +2,7 @@
 
 # Mouse IA - Architecture Decision Records (ADR)
 
-**Versão:** 1.0  
+**Versão:** 1.1  
 **Status:** Oficial
 
 ---
@@ -24,7 +24,7 @@ Seu status deverá ser atualizado para **Superseded**, indicando qual ADR a subs
 # Status possíveis
 
 | Status | Significado |
-|----------|------------|
+|---|---|
 | Draft | Em discussão |
 | Accepted | Aprovada |
 | Implemented | Implementada |
@@ -35,7 +35,7 @@ Seu status deverá ser atualizado para **Superseded**, indicando qual ADR a subs
 
 # Modelo Oficial
 
-Cada ADR deverá seguir exatamente esta estrutura.
+Cada ADR deverá seguir:
 
 ```text
 ADR-XXX
@@ -144,6 +144,10 @@ Cada Provider interpretar seus próprios resultados.
 
 Rejeitada.
 
+## Observações
+
+Providers não devem criar Findings ou Vulnerabilities.
+
 ---
 
 # ADR-003
@@ -162,7 +166,7 @@ Accepted
 
 ## Contexto
 
-Diversas bases públicas poderão ser utilizadas.
+Diversas bases públicas poderão ser utilizadas para enriquecimento de vulnerabilidades.
 
 ## Decisão
 
@@ -173,12 +177,17 @@ Toda consulta às bases externas ocorrerá exclusivamente através da camada Thr
 - Código desacoplado.
 - Fácil inclusão de novas fontes.
 - Cache centralizado.
+- Histórico de enriquecimento.
 
 ## Alternativas Consideradas
 
-Cada scanner consultar CVEs.
+Cada scanner consultar CVEs diretamente.
 
 Rejeitada.
+
+## Observações
+
+Threat Intelligence complementa Findings, não substitui evidências técnicas.
 
 ---
 
@@ -204,15 +213,27 @@ A IA possui finalidade analítica.
 
 A IA receberá apenas:
 
-- Signals
-- Findings
-- Vulnerabilities
+- Signals;
+- Findings;
+- Vulnerabilities.
 
 A IA nunca executará ferramentas externas.
 
+A IA também nunca deverá:
+
+- executar ações destrutivas;
+- alterar produção sem aprovação;
+- tomar decisões críticas sem justificativa.
+
 ## Consequências
 
-Separação clara entre coleta e análise.
+Separação clara entre coleta, análise e execução.
+
+## Alternativas Consideradas
+
+Permitir que a IA execute ferramentas automaticamente.
+
+Rejeitada.
 
 ---
 
@@ -232,7 +253,7 @@ Accepted
 
 ## Contexto
 
-O Mouse IA deverá integrar dezenas de ferramentas diferentes ao longo do tempo.
+O Mouse IA deverá integrar dezenas de ferramentas diferentes.
 
 ## Decisão
 
@@ -243,6 +264,12 @@ Toda ferramenta externa deverá ser implementada como um Provider independente.
 - Fácil manutenção.
 - Fácil expansão.
 - Baixo acoplamento.
+
+## Alternativas Consideradas
+
+Cada scanner possuir sua própria lógica de negócio.
+
+Rejeitada.
 
 ---
 
@@ -262,7 +289,7 @@ Accepted
 
 ## Decisão
 
-Todo processamento deverá seguir obrigatoriamente:
+Todo processamento deverá seguir:
 
 ```text
 Organization
@@ -281,11 +308,11 @@ Scan
 
 ↓
 
-Providers
+Provider
 
 ↓
 
-Signals
+Signal
 
 ↓
 
@@ -293,7 +320,7 @@ Correlation Engine
 
 ↓
 
-Findings
+Finding
 
 ↓
 
@@ -301,7 +328,7 @@ Threat Intelligence
 
 ↓
 
-Vulnerabilities
+Vulnerability
 
 ↓
 
@@ -309,20 +336,24 @@ AI Engine
 
 ↓
 
-Recommendations
+Recommendation
 
 ↓
 
-Tasks
+Task
 
 ↓
 
-Reports
+Report
 ```
 
 ## Consequências
 
 Todos os módulos deverão respeitar este fluxo.
+
+## Observações
+
+Nenhuma camada deverá pular responsabilidades.
 
 ---
 
@@ -342,9 +373,7 @@ Accepted
 
 ## Contexto
 
-O projeto deverá evoluir durante muitos anos.
-
-Tecnologias poderão ser substituídas.
+Tecnologias podem mudar durante a evolução do produto.
 
 ## Decisão
 
@@ -352,7 +381,7 @@ As regras de negócio permanecerão independentes de frameworks, bancos de dados
 
 ## Consequências
 
-Maior longevidade do projeto.
+Maior longevidade da plataforma.
 
 ---
 
@@ -374,15 +403,15 @@ Accepted
 
 Toda funcionalidade deverá considerar segurança desde sua concepção.
 
-Princípios obrigatórios:
+Princípios:
 
-- Menor Privilégio
-- Defense in Depth
-- Secure Defaults
-- Fail Secure
-- Validação de Entrada
-- Auditoria
-- Logs Estruturados
+- Menor Privilégio.
+- Defense in Depth.
+- Secure Defaults.
+- Fail Secure.
+- Validação de Entrada.
+- Auditoria.
+- Logs Estruturados.
 
 ---
 
@@ -404,7 +433,7 @@ Accepted
 
 Nenhuma implementação poderá ocorrer diretamente.
 
-Toda funcionalidade deverá seguir:
+Fluxo:
 
 ```text
 Roadmap
@@ -444,27 +473,352 @@ Accepted
 
 ## Contexto
 
-Projetos longos tendem a perder consistência quando decisões permanecem apenas em conversas.
+Projetos longos perdem consistência quando decisões permanecem apenas em conversas.
 
 ## Decisão
 
 A documentação oficial possui prioridade sobre o código em caso de divergência conceitual.
 
-Os seguintes documentos compõem a fonte de verdade do projeto:
+Documentos oficiais:
 
 - ARCHITECTURE.md
 - AGENT.md
+- DECISIONS.md
+- DOMAIN.md
 - ROADMAP.md
 - SECURITY.md
 - SIGNALS.md
-- DECISIONS.md
 
 ## Consequências
 
 - Maior consistência arquitetural.
-- Facilidade para onboarding de novos desenvolvedores e Agents.
-- Redução de retrabalho.
-- Evolução previsível da plataforma.
+- Melhor onboarding.
+- Menor retrabalho.
+
+---
+
+# ADR-011
+
+## Título
+
+Isolamento Multi-Tenant por Organization
+
+## Status
+
+Accepted
+
+## Data
+
+2026-07-16
+
+## Contexto
+
+O Mouse IA será uma plataforma SaaS utilizada por múltiplas empresas.
+
+## Decisão
+
+Toda informação operacional deverá respeitar:
+
+```text
+Organization
+
+↓
+
+Project
+
+↓
+
+Asset
+
+↓
+
+Scan
+```
+
+Nenhuma consulta poderá retornar dados fora do contexto autorizado.
+
+## Consequências
+
+- Segurança entre tenants.
+- Controle de acesso previsível.
+- Preparação para Enterprise.
+
+## Alternativas Consideradas
+
+Separação apenas por filtros de frontend.
+
+Rejeitada.
+
+## Observações
+
+O isolamento deve existir no backend.
+
+---
+
+# ADR-012
+
+## Título
+
+Separação entre Authentication e Authorization
+
+## Status
+
+Accepted
+
+## Data
+
+2026-07-16
+
+## Contexto
+
+Identidade e permissão possuem responsabilidades diferentes.
+
+## Decisão
+
+Authentication responde:
+
+"Quem é o usuário?"
+
+Authorization responde:
+
+"O que o usuário pode acessar?"
+
+## Consequências
+
+Permite evolução futura para:
+
+- RBAC;
+- MFA;
+- SSO;
+- permissões por Organization;
+- permissões por Project.
+
+## Alternativas Consideradas
+
+Misturar autenticação e autorização.
+
+Rejeitada.
+
+---
+
+# ADR-013
+
+## Título
+
+Exclusão lógica de entidades operacionais
+
+## Status
+
+Accepted
+
+## Data
+
+2026-07-16
+
+## Contexto
+
+Em Cyber Security, histórico possui valor de evidência.
+
+## Decisão
+
+Entidades operacionais críticas utilizarão exclusão lógica.
+
+Exemplos:
+
+- Organization;
+- Project;
+- Asset;
+- Scan;
+- Finding.
+
+## Consequências
+
+- Preservação histórica.
+- Auditoria.
+- Recuperação de dados.
+
+## Alternativas Consideradas
+
+Exclusão física definitiva.
+
+Rejeitada.
+
+---
+
+# ADR-014
+
+## Título
+
+Separação de Containers Operacionais e Recursos Monitorados
+
+## Status
+
+Accepted
+
+## Data
+
+2026-07-16
+
+## Contexto
+
+A entidade Site inicialmente acumulava duas responsabilidades:
+
+- representar um agrupador operacional;
+- representar um recurso técnico monitorado.
+
+Essa abordagem limita a evolução para uma arquitetura multi-tenant escalável.
+
+## Decisão
+
+A entidade Site deixa de existir como conceito de domínio.
+
+Cada Site legado será transformado em:
+
+Project:
+
+- representa contexto operacional;
+- mantém agrupamento;
+- preserva histórico.
+
+Asset:
+
+- representa recurso técnico;
+- contém URL, domínio ou aplicação monitorada.
+
+Durante a migração:
+
+Cada Site existente será convertido em:
+
+1 Project operacional.
+
++
+
+1 Asset técnico correspondente.
+
+O histórico de scans e evidências deverá ser preservado.
+
+## Consequências
+
+Benefícios:
+
+- Domínio mais claro.
+- Melhor isolamento multi-tenant.
+- Suporte para múltiplos Assets por Project.
+- Evolução para ASM.
+
+Custos:
+
+- Migration de dados.
+- Atualização de APIs.
+- Atualização do frontend.
+
+## Alternativas Consideradas
+
+Manter Site como entidade híbrida.
+
+Rejeitada.
+
+## Observações
+
+Esta decisão deve orientar toda evolução futura do modelo Asset.
+
+---
+
+# ADR-015
+
+## Título
+
+PostgreSQL como banco de produção
+
+## Status
+
+Accepted
+
+## Data
+
+2026-07-16
+
+## Contexto
+
+SQLite é adequado para desenvolvimento local, porém possui limitações para concorrência e escala.
+
+## Decisão
+
+SQLite será utilizado somente para desenvolvimento.
+
+Ambientes produtivos deverão utilizar PostgreSQL.
+
+## Consequências
+
+- Maior escalabilidade.
+- Melhor concorrência.
+- Maior compatibilidade Enterprise.
+
+## Alternativas Consideradas
+
+Utilizar SQLite em produção.
+
+Rejeitada.
+
+---
+
+# ADR-016
+
+## Título
+
+Execução assíncrona de Scans via Workers
+
+## Status
+
+Accepted
+
+## Data
+
+2026-07-16
+
+## Contexto
+
+Scans podem ser operações longas e intensivas.
+
+Executá-los dentro da API limita escalabilidade.
+
+## Decisão
+
+A execução de scans deverá utilizar processamento assíncrono.
+
+Arquitetura:
+
+```text
+API
+
+↓
+
+Redis Queue
+
+↓
+
+Celery Worker
+
+↓
+
+Provider
+
+↓
+
+Signals
+```
+
+## Consequências
+
+- Melhor escalabilidade.
+- Separação entre API e processamento.
+- Execuções paralelas controladas.
+
+## Alternativas Consideradas
+
+Executar scans diretamente no FastAPI.
+
+Rejeitada.
 
 ---
 
@@ -472,20 +826,20 @@ Os seguintes documentos compõem a fonte de verdade do projeto:
 
 Novas decisões deverão ser registradas sempre que envolverem:
 
-- Arquitetura
-- Banco de Dados
-- Segurança
-- IA
-- Threat Intelligence
-- Providers
-- APIs
-- Escalabilidade
-- Performance
-- Infraestrutura
-- Modelo de Dados
-- Estratégias de Cache
-- Estratégias de Filas
-- Observabilidade
+- Arquitetura.
+- Banco de Dados.
+- Segurança.
+- IA.
+- Threat Intelligence.
+- Providers.
+- APIs.
+- Escalabilidade.
+- Performance.
+- Infraestrutura.
+- Modelo de Dados.
+- Estratégias de Cache.
+- Estratégias de Filas.
+- Observabilidade.
 
 ---
 
@@ -495,5 +849,4 @@ Uma boa arquitetura não é aquela que nunca muda.
 
 É aquela cuja evolução é documentada, compreendida e rastreável.
 
-Cada ADR representa uma decisão consciente tomada para preservar a qualidade, a consistência e a longevidade do Mouse IA.
-
+Cada ADR representa uma decisão consciente tomada para preservar a qualidade, consistência e longevidade do Mouse IA.

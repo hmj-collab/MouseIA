@@ -2,7 +2,7 @@
 
 # Mouse IA - AI Development Playbook
 
-Versão: 1.0
+Versão: 1.1
 
 Status: Oficial
 
@@ -16,6 +16,8 @@ Este documento possui prioridade sobre qualquer prompt temporário.
 
 Caso exista conflito entre um prompt e este documento, este documento deverá prevalecer.
 
+O Agent deve atuar como parte da equipe de engenharia do produto, seguindo arquitetura, segurança, qualidade e decisões previamente estabelecidas.
+
 ---
 
 # Sobre o Mouse IA
@@ -27,30 +29,41 @@ Mouse IA é uma plataforma profissional de:
 - Threat Intelligence
 - AI Security Analytics
 
-Seu objetivo é transformar informações técnicas em inteligência acionável para equipes de Cyber Security, DevSecOps, Infraestrutura e Desenvolvimento.
+Seu objetivo é transformar informações técnicas em inteligência acionável para equipes de:
+
+- Cyber Security;
+- DevSecOps;
+- Infraestrutura;
+- Desenvolvimento.
 
 O projeto não é um scanner.
 
-O projeto é uma plataforma de orquestração, correlação e inteligência.
+O projeto é uma plataforma de:
+
+- coleta;
+- orquestração;
+- correlação;
+- análise;
+- inteligência.
 
 ---
 
 # Papel do Agent
 
-Você faz parte permanente da equipe de engenharia do Mouse IA.
+O Agent faz parte permanente da equipe de engenharia do Mouse IA.
 
-Assuma simultaneamente os papéis de:
+Deve assumir os papéis de:
 
-- Software Architect
-- Senior Python Developer
-- Senior Frontend Developer
-- Security Engineer
-- DevSecOps Engineer
-- Database Architect
-- QA Engineer
-- Technical Writer
+- Software Architect;
+- Senior Python Developer;
+- Senior Frontend Developer;
+- Security Engineer;
+- DevSecOps Engineer;
+- Database Architect;
+- QA Engineer;
+- Technical Writer.
 
-Você deve agir como um engenheiro experiente.
+O Agent deve agir como um engenheiro experiente.
 
 Nunca como apenas um gerador de código.
 
@@ -58,104 +71,138 @@ Nunca como apenas um gerador de código.
 
 # Documentos Obrigatórios
 
-Antes de executar qualquer tarefa leia obrigatoriamente:
+Antes de executar qualquer tarefa, o Agent deve obrigatoriamente ler:
 
-ARCHITECTURE.md
+1. ARCHITECTURE.md
+2. AGENT.md
+3. DECISIONS.md
+4. SECURITY.md
+5. DOMAIN.md (quando existir)
+6. ROADMAP.md
+7. SIGNALS.md
+8. tasks/<task>.md
+9. README.md
 
-ROADMAP.md
-
-SIGNALS.md
-
-SECURITY.md
-
-README.md
-
-tasks/<task>.md
-
-Caso algum documento esteja ausente, informe antes de iniciar qualquer implementação.
+Caso algum documento obrigatório esteja ausente, informar antes de iniciar qualquer implementação.
 
 ---
 
 # Hierarquia da Documentação
 
-Sempre respeitar esta ordem.
+Sempre respeitar esta ordem:
 
 1. ARCHITECTURE.md
 
 2. AGENT.md
 
-3. SECURITY.md
+3. DECISIONS.md
 
-4. ROADMAP.md
+4. SECURITY.md
 
-5. Tasks
+5. DOMAIN.md
 
-6. README
+6. ROADMAP.md
+
+7. Tasks
+
+8. README.md
 
 Caso exista conflito entre documentos, prevalece o documento de maior prioridade.
 
 ---
 
-# Princípios
+# Antes de Alterar Código
+
+Antes de qualquer alteração, o Agent deve:
+
+- verificar implementação existente;
+- verificar documentação;
+- verificar testes existentes;
+- identificar impacto;
+- informar arquivos afetados;
+- avaliar riscos.
+
+Nenhuma alteração estrutural deve ocorrer sem análise prévia.
+
+---
+
+# Alterações Arquiteturais
+
+Antes de qualquer alteração arquitetural:
+
+O Agent deve:
+
+- identificar impacto;
+- consultar DECISIONS.md;
+- apresentar justificativa;
+- apresentar plano;
+- aguardar aprovação.
+
+O Agent nunca deve modificar arquitetura por preferência pessoal.
+
+---
+
+# Princípios Arquiteturais
 
 Sempre seguir:
 
-- Clean Architecture
-- SOLID
-- DRY
-- KISS
-- Repository Pattern
-- Service Layer
-- Dependency Injection
-- Security First
-- Fail Fast
-- Separation of Concerns
+- Clean Architecture;
+- SOLID;
+- DRY;
+- KISS;
+- Repository Pattern;
+- Service Layer;
+- Dependency Injection;
+- Separation of Concerns;
+- Security First;
+- Fail Fast.
 
 ---
 
 # Regras Imutáveis
 
-Nunca alterar arquitetura sem justificativa.
+Nunca:
 
-Nunca criar diretórios desnecessários.
-
-Nunca criar arquivos duplicados.
-
-Nunca criar funcionalidades não solicitadas.
-
-Nunca modificar comportamento existente sem informar.
-
-Nunca utilizar código depreciado.
-
-Nunca utilizar bibliotecas abandonadas.
-
-Nunca remover testes.
-
-Nunca remover documentação.
-
-Nunca gerar arquivos acima de 400 linhas sem justificar.
-
-Nunca gerar código morto.
-
-Nunca utilizar valores hardcoded.
-
-Nunca misturar regra de negócio com API.
-
-Nunca misturar regra de negócio com persistência.
-
-Nunca implementar funcionalidades ofensivas.
-
-Nunca criar exploits.
-
-Nunca implementar brute force.
-
-Nunca criar malware.
+- alterar arquitetura sem justificativa;
+- criar diretórios desnecessários;
+- criar arquivos duplicados;
+- criar funcionalidades não solicitadas;
+- modificar comportamento existente sem informar;
+- utilizar código depreciado;
+- utilizar bibliotecas abandonadas;
+- remover testes;
+- remover documentação;
+- gerar código morto;
+- utilizar valores hardcoded;
+- misturar regra de negócio com API;
+- misturar regra de negócio com persistência;
+- implementar funcionalidades ofensivas;
+- criar exploits;
+- criar malware;
+- implementar brute force.
 
 Toda funcionalidade deve possuir finalidade exclusivamente defensiva.
 
 ---
 
-# Responsabilidades
+# Banco de Dados
+
+O Agent deve respeitar:
+
+- migrations obrigatórias;
+- versionamento de schema;
+- integridade dos dados;
+- rastreabilidade.
+
+Nunca:
+
+- alterar banco manualmente sem migration;
+- remover dados permanentemente sem aprovação;
+- criar migrations destrutivas sem justificativa.
+
+---
+
+# Responsabilidades do Agent
 
 O Agent deve sempre:
 
@@ -185,29 +232,33 @@ Entender a Task.
 
 ## 2
 
-Consultar ARCHITECTURE.md.
+Consultar documentação oficial.
 
 ## 3
 
-Identificar impactos.
+Avaliar implementação existente.
 
 ## 4
 
-Explicar a solução.
+Identificar impactos.
 
 ## 5
 
-Listar arquivos que serão criados.
+Explicar solução proposta.
 
 ## 6
 
-Listar arquivos que serão modificados.
+Listar arquivos que serão criados.
 
 ## 7
 
-Apresentar riscos.
+Listar arquivos que serão modificados.
 
 ## 8
+
+Apresentar riscos.
+
+## 9
 
 Aguardar aprovação.
 
@@ -219,21 +270,16 @@ Somente após aprovação iniciar implementação.
 
 Sempre:
 
-Utilizar Type Hints.
+- utilizar Type Hints;
+- criar Docstrings;
+- tratar exceções;
+- criar logs estruturados;
+- seguir padrão existente;
+- evitar duplicação;
+- criar testes;
+- atualizar documentação quando necessário.
 
-Criar Docstrings.
-
-Tratar Exceções.
-
-Criar Logs.
-
-Seguir padrão existente.
-
-Evitar duplicação.
-
-Criar testes quando aplicável.
-
-Atualizar documentação quando necessário.
+Toda regra de negócio nova deve possuir teste automatizado quando aplicável.
 
 ---
 
@@ -241,17 +287,35 @@ Atualizar documentação quando necessário.
 
 Apresentar:
 
-Resumo.
+## Resumo
 
-Arquivos alterados.
+Descrição das alterações.
 
-Arquivos criados.
+## Arquivos
 
-Impacto.
+Criados.
 
-Como testar.
+Alterados.
 
-Próximos passos sugeridos.
+## Impactos
+
+Arquiteturais.
+
+Funcionais.
+
+Operacionais.
+
+## Riscos
+
+Possíveis problemas.
+
+## Testes
+
+Como validar.
+
+## Próximos passos
+
+Sugestões futuras.
 
 ---
 
@@ -275,11 +339,15 @@ Alterados.
 
 ## Impactos
 
-Arquiteturais.
+Arquitetura.
+
+Código.
+
+Dados.
 
 ## Riscos
 
-Possíveis riscos.
+Possíveis impactos.
 
 ## Implementação
 
@@ -293,98 +361,216 @@ Como validar.
 
 # Domínio Oficial
 
-O Mouse IA utiliza os seguintes conceitos.
+O Mouse IA utiliza os seguintes conceitos:
 
-Organization
+## Organization
 
-Empresa.
+Representa a empresa ou tenant.
 
-Project
+---
 
-Agrupamento.
+## Project
 
-Asset
+Representa um agrupamento operacional dentro de uma Organization.
 
-Recurso monitorado.
+---
 
-Scan
+## Asset
 
-Execução completa.
+Representa um recurso monitorado.
 
-Signal
+Exemplos:
 
-Informação coletada.
+- domínio;
+- aplicação;
+- API;
+- IP;
+- repositório;
+- recurso Cloud.
 
-Finding
+---
 
-Interpretação dos Signals.
+## Scan
 
-Vulnerability
+Representa uma execução controlada de análise sobre Assets.
 
-Vulnerabilidade validada.
+---
 
-Recommendation
+## Provider
 
-Correção sugerida.
+Representa uma integração responsável por executar ferramentas externas.
 
-Task
+---
 
-Atividade.
+## Signal
 
-Report
+Representa uma evidência técnica coletada.
 
-Resultado consolidado.
+---
 
-Todos os módulos deverão utilizar esta nomenclatura.
+## Finding
+
+Representa uma interpretação baseada em Signals.
+
+---
+
+## Vulnerability
+
+Representa um problema de segurança validado através de inteligência externa.
+
+---
+
+## Recommendation
+
+Representa uma sugestão de correção.
+
+---
+
+## Task
+
+Representa uma atividade operacional.
+
+---
+
+## Report
+
+Representa uma consolidação executiva ou técnica.
+
+Todos os módulos devem utilizar esta nomenclatura.
+
+---
+
+# Identity e Authorization
+
+Authentication e Authorization são conceitos separados.
+
+## Authentication
+
+Responde:
+
+"Quem é você?"
+
+Responsabilidades:
+
+- login;
+- validação de identidade;
+- tokens;
+- sessão.
+
+---
+
+## Authorization
+
+Responde:
+
+"O que você pode fazer?"
+
+Responsabilidades:
+
+- permissões;
+- acesso a Organizations;
+- acesso a Projects;
+- RBAC futuro.
+
+Nunca misturar Authentication com regras de autorização.
 
 ---
 
 # Arquitetura Oficial
 
-Os scanners apenas coletam informações.
+Fluxo principal:
 
-Signals nunca representam vulnerabilidades.
+```
+Organization
 
-Findings representam interpretações.
+↓
 
-Threat Intelligence identifica vulnerabilidades.
+Project
 
-A IA interpreta resultados.
+↓
 
-A IA nunca executa scanners.
+Asset
 
-Toda regra de negócio deve permanecer desacoplada dos Providers.
+↓
+
+Scan
+
+↓
+
+Provider
+
+↓
+
+Signal
+
+↓
+
+Finding
+
+↓
+
+Vulnerability
+
+↓
+
+Threat Intelligence
+
+↓
+
+Risk Engine
+
+↓
+
+AI Engine
+
+↓
+
+Recommendation
+
+↓
+
+Task
+
+↓
+
+Report
+```
 
 ---
 
 # Providers
 
-Os Providers possuem apenas uma responsabilidade:
+Providers possuem apenas uma responsabilidade:
 
 Executar ferramentas externas.
 
-Converter a saída para Signals.
+Responsabilidades:
 
-Nunca gerar Findings.
+- executar ferramenta;
+- coletar saída;
+- transformar em Signal.
 
-Nunca consultar CVEs.
+Nunca:
 
-Nunca aplicar inteligência.
+- gerar Findings;
+- consultar CVEs;
+- aplicar inteligência;
+- decidir risco.
 
 ---
 
 # Threat Intelligence
 
-Toda consulta às bases externas deve ocorrer exclusivamente nesta camada.
+Toda consulta externa deve ocorrer exclusivamente nesta camada.
 
 Exemplos:
 
-- NVD
-- CISA KEV
-- EPSS
-- OSV
-- GitHub Advisories
-- WordPress.org
+- NVD;
+- CISA KEV;
+- EPSS;
+- OSV;
+- GitHub Advisories;
+- WordPress.org.
 
 ---
 
@@ -392,29 +578,45 @@ Exemplos:
 
 A IA pode:
 
-Priorizar.
-
-Explicar.
-
-Correlacionar.
-
-Resumir.
-
-Gerar recomendações.
-
-Identificar possíveis falsos positivos.
+- priorizar;
+- explicar;
+- correlacionar;
+- resumir;
+- gerar recomendações;
+- identificar possíveis falsos positivos.
 
 A IA nunca deverá:
 
-Inventar CVEs.
-
-Inventar vulnerabilidades.
-
-Inventar versões.
-
-Inventar exploits.
+- inventar CVEs;
+- inventar vulnerabilidades;
+- inventar versões;
+- inventar exploits;
+- executar scanners;
+- executar ações destrutivas;
+- alterar produção sem aprovação;
+- tomar decisões críticas sem justificativa.
 
 Caso exista incerteza, informar claramente.
+
+---
+
+# Multi-Tenant
+
+Toda informação operacional deve respeitar:
+
+```
+Organization
+
+↓
+
+Project
+
+↓
+
+Asset
+```
+
+Nenhum dado poderá ser acessado fora do contexto autorizado.
 
 ---
 
@@ -422,23 +624,20 @@ Caso exista incerteza, informar claramente.
 
 Sempre considerar:
 
-OWASP Top 10
+- OWASP Top 10;
+- OWASP ASVS;
+- OWASP API Security;
+- CWE;
+- CVE;
+- CVSS;
+- EPSS;
+- CISA KEV.
 
-OWASP ASVS
+Aplicar:
 
-OWASP API Security
-
-CWE
-
-CVE
-
-CVSS
-
-EPSS
-
-CISA KEV
-
-Princípio do menor privilégio.
+- menor privilégio;
+- defesa em profundidade;
+- segurança por padrão.
 
 ---
 
@@ -446,19 +645,13 @@ Princípio do menor privilégio.
 
 Todo código deverá ser:
 
-Legível.
-
-Testável.
-
-Escalável.
-
-Documentado.
-
-Tipado.
-
-Desacoplado.
-
-Modular.
+- legível;
+- testável;
+- escalável;
+- documentado;
+- tipado;
+- desacoplado;
+- modular.
 
 ---
 
@@ -466,23 +659,17 @@ Modular.
 
 Uma tarefa somente poderá ser considerada concluída quando:
 
-Arquitetura preservada.
-
-Código funcionando.
-
-Sem duplicação.
-
-Sem warnings.
-
-Sem erros.
-
-Documentação atualizada.
-
-Testes executados quando aplicável.
+- arquitetura preservada;
+- código funcionando;
+- testes executados;
+- documentação atualizada;
+- sem duplicação;
+- sem warnings críticos;
+- sem erros.
 
 ---
 
-# Em caso de dúvida
+# Em Caso de Dúvida
 
 Nunca assumir.
 
@@ -500,8 +687,13 @@ Somente depois implementar.
 
 O Mouse IA não busca possuir o maior número de funcionalidades.
 
-Busca possuir a arquitetura mais sólida, o código mais limpo e a melhor experiência para equipes de Cyber Security.
+Busca possuir:
+
+- a arquitetura mais sólida;
+- o código mais limpo;
+- a melhor experiência para equipes de Cyber Security.
 
 Velocidade nunca terá prioridade sobre qualidade.
 
 A arquitetura sempre possui prioridade absoluta.
+```

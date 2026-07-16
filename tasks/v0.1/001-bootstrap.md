@@ -12,11 +12,11 @@
 
 # Objetivo
 
-Construir a infraestrutura inicial do Mouse IA, preparando o projeto para receber novas funcionalidades de forma organizada, modular e escalável.
+Construir a infraestrutura inicial do Mouse IA, estabelecendo a fundação técnica, arquitetural e operacional da plataforma.
 
-Esta Task estabelece a fundação técnica da plataforma.
+Esta Task define os padrões que serão utilizados pelos módulos de negócio futuros, garantindo organização, modularidade, escalabilidade e segurança desde o início.
 
-Nenhuma regra de negócio deverá ser implementada nesta etapa.
+Nenhuma regra de negócio de domínio deverá ser implementada nesta etapa.
 
 ---
 
@@ -27,6 +27,21 @@ O Mouse IA será uma plataforma Enterprise de Attack Surface Management (ASM), V
 Antes da implementação dos módulos de negócio é necessário garantir que toda a infraestrutura esteja organizada e padronizada.
 
 Esta Task representa o ponto de partida oficial do desenvolvimento.
+
+---
+
+# Princípios Arquiteturais
+
+A fundação da plataforma deverá seguir os seguintes princípios:
+
+- Separação entre infraestrutura e domínio;
+- Separação entre camada de identidade e módulos de negócio;
+- Baixo acoplamento entre componentes;
+- Evolução incremental da arquitetura;
+- Segurança como requisito desde a fundação;
+- Preparação para ambiente Enterprise Multi-Tenant.
+
+A Task Bootstrap deverá criar apenas os recursos necessários para suportar os módulos futuros.
 
 ---
 
@@ -41,7 +56,7 @@ Inclui:
 - Configuração do Frontend
 - Configuração do Banco de Dados
 - Configuração do ambiente de desenvolvimento
-- Configuração inicial de logs
+- Configuração inicial de logs estruturados
 - Configuração inicial de migrations
 - Configuração inicial de testes
 - Organização da documentação
@@ -129,6 +144,7 @@ Backend
 - repositories/
 - services/
 - schemas/
+- dependencies/
 - scanners/
 - workers/
 - ai/
@@ -139,11 +155,14 @@ Frontend
 - React
 - Vite
 - Tailwind
+- services/
+- components/
 
 Documentação
 
 - README.md
 - docs/
+- tasks/
 
 Infraestrutura
 
@@ -151,6 +170,22 @@ Infraestrutura
 - Alembic
 - requirements.txt
 - package.json
+- arquivos de configuração de ambiente
+
+---
+
+# Segurança da Fundação
+
+Mesmo nesta etapa inicial, a estrutura deverá estar preparada para:
+
+- Gestão segura de configurações;
+- Separação de ambientes;
+- Controle de segredos via variáveis de ambiente;
+- Logs estruturados;
+- Rastreamento de erros;
+- Evolução futura para controles de autorização.
+
+Nenhuma credencial ou segredo deverá permanecer versionado.
 
 ---
 
@@ -213,4 +248,4 @@ Após a conclusão desta Task, iniciar:
 
 **v0.1 / 002-authentication.md**
 
-A partir desta etapa, o Mouse IA estará preparado para receber os primeiros módulos funcionais da plataforma.
+A partir desta etapa, o Mouse IA estará preparado para receber os primeiros módulos funcionais da plataforma, iniciando pela camada de identidade e autenticação.
