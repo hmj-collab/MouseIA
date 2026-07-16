@@ -8,6 +8,7 @@ class SiteCreate(BaseModel):
     url: HttpUrl
     description: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
+    company_id: Optional[int] = None
 
 
 class SiteUpdate(BaseModel):
@@ -15,6 +16,7 @@ class SiteUpdate(BaseModel):
     url: Optional[HttpUrl] = None
     description: Optional[str] = None
     tags: Optional[list[str]] = None
+    company_id: Optional[int] = None
 
 
 class SiteOut(BaseModel):
@@ -23,3 +25,4 @@ class SiteOut(BaseModel):
     url: str
     description: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
+    company_id: Optional[int] = None

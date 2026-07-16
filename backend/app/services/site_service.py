@@ -44,6 +44,7 @@ class SiteService:
             url=site.url,
             description=site.description,
             tags=list(site.tags or []),
+            company_id=site.company_id,
         )
 
 

@@ -19,6 +19,7 @@ class SiteRepository:
             url=str(payload.url),
             description=payload.description,
             tags=payload.tags or [],
+            company_id=payload.company_id,
         )
         self.db.add(site)
         self.db.commit()
@@ -41,6 +42,8 @@ class SiteRepository:
             site.description = payload.description
         if payload.tags is not None:
             site.tags = payload.tags
+        if "company_id" in payload.model_fields_set:
+            site.company_id = payload.company_id
 
         self.db.commit()
         self.db.refresh(site)
