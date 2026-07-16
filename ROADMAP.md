@@ -23,12 +23,12 @@ Objetivo: estruturar a base técnica e conceitual do projeto.
 - [x] base de backend implementada
 - [x] padrões de testes e migrações em lote incorporados
 
-## Fase 1 - Núcleo da plataforma (em andamento)
+## Fase 1 - Núcleo da plataforma (100% Concluída)
 Objetivo: disponibilizar os blocos centrais para uso e operação.
 
 - [x] criar gestão de usuários e empresas (concluída no backend e testada)
-- [ ] estruturar um dashboard inicial
-- [ ] consolidar a experiência de navegação do frontend além da interface de teste atual
+- [x] estruturar um dashboard inicial (painel de métricas e status implementado)
+- [x] consolidar a experiência de navegação do frontend além da interface de teste atual (React/Vite SPA)
 
 ## Fase 2 - Coleta e varredura (em andamento)
 Objetivo: incorporar os primeiros mecanismos de ingestão e análise.

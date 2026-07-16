@@ -1,0 +1,245 @@
+const API_BASE_URL = 'http://127.0.0.1:8000';
+
+class ApiService {
+  getToken() {
+    return localStorage.getItem('token');
+  }
+
+  setToken(token) {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }
+
+  getCurrentUser() {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      // Decode JWT payload (standard Base64 decode)
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  logout() {
+    this.setToken(null);
+  }
+
+  async request(endpoint, options = {}) {
+    const token = this.getToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+      ...options.headers,
+    };
+
+    const config = {
+      ...options,
+      headers,
+    };
+
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    try {
+      const response = await fetch(url, config);
+      if (response.status === 401) {
+        this.logout();
+        window.dispatchEvent(new Event('auth-failed'));
+      }
+      
+      if (response.status === 204) {
+        return true;
+      }
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.detail || 'Erro na requisição à API.');
+      }
+      return data;
+    } catch (error) {
+      console.error(`API Error on ${endpoint}:`, error);
+      throw error;
+    }
+  }
+
+  // Auth Endpoints
+  async login(username, password) {
+    const data = await this.request('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    });
+    this.setToken(data.access_token);
+    return this.getCurrentUser();
+  }
+
+  async register(username, email, password, role = 'viewer') {
+    return this.request('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, email, password, role }),
+    });
+  }
+
+  // Companies Endpoints
+  async getCompanies() {
+    return this.request('/companies');
+  }
+
+  async getCompany(id) {
+    return this.request(`/companies/${id}`);
+  }
+
+  async createCompany(companyData) {
+    return this.request('/companies', {
+      method: 'POST',
+      body: JSON.stringify(companyData),
+    });
+  }
+
+  async updateCompany(id, companyData) {
+    return this.request(`/companies/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(companyData),
+    });
+  }
+
+  async deleteCompany(id) {
+    return this.request(`/companies/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Sites Endpoints
+  async getSites() {
+    return this.request('/sites');
+  }
+
+  async getSite(id) {
+    return this.request(`/sites/${id}`);
+  }
+
+  async createSite(siteData) {
+    return this.request('/sites', {
+      method: 'POST',
+      body: JSON.stringify(siteData),
+    });
+  }
+
+  async updateSite(id, siteData) {
+    return this.request(`/sites/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(siteData),
+    });
+  }
+
+  async deleteSite(id) {
+    return this.request(`/sites/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Assets Endpoints
+  async getAssets(companyId = null, siteId = null) {
+    let query = '';
+    const params = [];
+    if (companyId) params.push(`company_id=${companyId}`);
+    if (siteId) params.push(`site_id=${siteId}`);
+    if (params.length) query = `?${params.join('&')}`;
+
+    return this.request(`/assets${query}`);
+  }
+
+  async createAsset(assetData) {
+    return this.request('/assets', {
+      method: 'POST',
+      body: JSON.stringify(assetData),
+    });
+  }
+
+  async updateAsset(id, assetData) {
+    return this.request(`/assets/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(assetData),
+    });
+  }
+
+  async deleteAsset(id) {
+    return this.request(`/assets/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Scans Endpoints
+  async getScans(siteId = null, assetId = null) {
+    let query = '';
+    const params = [];
+    if (siteId) params.push(`site_id=${siteId}`);
+    if (assetId) params.push(`asset_id=${assetId}`);
+    if (params.length) query = `?${params.join('&')}`;
+
+    return this.request(`/scans${query}`);
+  }
+
+  async createScan(scanData) {
+    return this.request('/scans', {
+      method: 'POST',
+      body: JSON.stringify(scanData),
+    });
+  }
+
+  async updateScan(id, scanData) {
+    return this.request(`/scans/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(scanData),
+    });
+  }
+
+  async deleteScan(id) {
+    return this.request(`/scans/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async launchScan(id) {
+    return this.request(`/scans/${id}/launch`, {
+      method: 'POST',
+    });
+  }
+
+  // Signals Endpoints
+  async getSignals() {
+    return this.request('/signals');
+  }
+
+  async createSignal(signalData) {
+    return this.request('/signals', {
+      method: 'POST',
+      body: JSON.stringify(signalData),
+    });
+  }
+
+  // Findings Endpoints
+  async getFindings() {
+    return this.request('/findings');
+  }
+
+  async createFinding(findingData) {
+    return this.request('/findings', {
+      method: 'POST',
+      body: JSON.stringify(findingData),
+    });
+  }
+}
+
+export const api = new ApiService();
+export default api;

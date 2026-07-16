@@ -30,7 +30,7 @@ A base atual já contempla:
 - migrações em lote com Alembic (`render_as_batch=True` para suporte a SQLite)
 - autenticação JWT com os papéis `admin` e `viewer`
 - autorização robusta com base em escopos/papéis em todas as rotas de domínio
-- interface estática local simples para testes
+- frontend moderno em Single Page Application desenvolvido em React, Vite e Lucide Icons
 - 20 testes automatizados cobrindo ponta a ponta todos os componentes atuais com 100% de sucesso
 
 ## 4. Princípios de arquitetura
@@ -47,9 +47,10 @@ A base atual já contempla:
 
 Responsável pela interface de usuário e interação com o sistema.
 
-- frontend web
-- dashboards e telas de gestão
-- experiência para operação e análise
+- Single Page Application (SPA) em React e Vite.
+- Design System customizado (Vanilla CSS) com padrões dark mode, glassmorphism e micro-animações.
+- Dashboards com estatísticas e distribuições de severidade em tempo real.
+- Telas para cadastramento de Sites, Empresas, Ativos, execução de Varreduras e análise de Sinais e Achados.
 
 ### Camada de aplicação
 

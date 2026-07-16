@@ -16,7 +16,7 @@ A base do projeto está totalmente operacional localmente e com migrações de b
 - Criação e consulta de Findings associados a Signals
 - Integração robusta com SQLAlchemy e migrações do Alembic (suporte a batch mode para SQLite)
 - Autenticação JWT e autorização por cargo (`admin` e `viewer`)
-- Interface estática simplificada de teste local
+- Frontend completo e moderno (Single Page Application) em Vite + React + Lucide Icons, integrado com o backend (Dashboard, Escopo, Varreduras e Ameaças)
 - 20 testes automatizados cobrindo saúde, autenticação, autorização, Sites, Usuários, Empresas, Ativos, Scans, Sinais e Achados.
 
 ## Visão geral
