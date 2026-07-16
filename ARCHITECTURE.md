@@ -2,9 +2,9 @@
 
 ## 1. Visão geral
 
-O Mouse IA é uma plataforma profissional de gestão inteligente de vulnerabilidades e superfícies de ataque. A proposta não é apenas realizar varreduras de WordPress, mas atuar como uma camada central de observação, análise e priorização de riscos para ativos digitais.
+O Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto saiu da fase de estrutura conceitual e já possui uma base funcional de backend, com foco inicial no módulo de Sites.
 
-A plataforma será evoluída em módulos, começando com sites e expandindo para integrações com GitHub, Azure DevOps, GitLab, Docker, Kubernetes, Nginx, Apache, IIS, Linux, Windows, Cloudflare, SSL e DNS.
+A proposta continua expandindo para integrações com GitHub, Azure DevOps, GitLab, Docker, Kubernetes, Nginx, Apache, IIS, Linux, Windows, Cloudflare, SSL e DNS.
 
 ## 2. Objetivo do projeto
 
@@ -16,26 +16,21 @@ Construir uma plataforma escalável, modular e orientada a inteligência artific
 - gerar achados, recomendações e tarefas
 - apoiar decisões operacionais e estratégicas em segurança
 
-## 3. Escopo
+## 3. Estado atual da implementação
 
-### Escopo inicial
+A base atual já contempla:
 
-- gestão de sites para auditoria
-- cadastro de empresas, ambientes e tecnologias
-- estrutura base de API, banco de dados e módulos
-- fluxo de criação, leitura, atualização e exclusão de entidades
-
-### Escopo futuro
-
-- scanners específicos por tecnologia
-- integração com repositórios e ambientes de deployment
-- análise de infraestrutura, DNS, SSL, cloud e servidores
-- enriquecimento com inteligência artificial e bases externas como CVE, NVD, CISA KEV e EPSS
+- backend FastAPI com rotas principais
+- módulo de Sites com CRUD funcional
+- persistência via SQLAlchemy
+- migrações com Alembic
+- endpoint de autenticação básica
+- testes automatizados para health, Sites e auth
 
 ## 4. Princípios de arquitetura
 
 - Modularidade: cada domínio deve ser isolado por responsabilidade
-- Escalabilidade: a plataforma deve crescer por módulos, sem acoplar tudo em uma única camada
+- Escalabilidade: a plataforma deve crescer por módulos sem acoplar tudo em uma única camada
 - Observabilidade: o sistema deve permitir rastreio, logs e auditoria
 - Segurança: autenticação, autorização e proteção de dados são fundamentais
 - Extensibilidade: novos módulos e integrações devem ser adicionados com baixo impacto
@@ -54,7 +49,7 @@ Responsável pela interface de usuário e interação com o sistema.
 
 Responsável pela orquestração da lógica de negócio.
 
-- APIs REST
+- APIs REST com FastAPI
 - serviços de domínio
 - casos de uso
 - regras de negócio aplicadas ao contexto do módulo
@@ -63,7 +58,7 @@ Responsável pela orquestração da lógica de negócio.
 
 Responsável pelas regras e modelos centrais do negócio.
 
-- entidades como empresas, sites, ambientes, sinais e vulnerabilidades
+- entidades como sites, ambientes, sinais e vulnerabilidades
 - validações de negócio
 - fluxo de análise e correlação
 
@@ -71,162 +66,61 @@ Responsável pelas regras e modelos centrais do negócio.
 
 Responsável por integração com tecnologias externas e persistência.
 
-- banco de dados PostgreSQL
+- banco de dados SQLite para desenvolvimento local
+- PostgreSQL como alvo de produção
 - migrations com Alembic
-- filas assíncronas
-- cache
-- integrações com providers externos
+- filas assíncronas e cache no futuro
 
-## 6. Arquitetura funcional
-
-O fluxo principal da plataforma segue a ideia de um pipeline de análise:
-
-1. Cadastro de ativos e entidades
-2. Coleta de sinais e evidências
-3. Processamento e correlação
-4. Geração de achados e vulnerabilidades
-5. Criação de recomendações e tarefas
-
-Fluxo resumido:
-
-Asset → Scan → Signals → Correlation Engine → Findings → Vulnerabilities → Recommendations → Tasks
-
-## 7. Estrutura de diretórios
+## 6. Estrutura do backend atual
 
 ```text
 backend/
-├── app/
-│   ├── api/
-│   │   ├── v1/
-│   │   └── deps/
-│   ├── core/
-│   │   ├── config.py
-│   │   ├── logging.py
-│   │   ├── security.py
-│   │   └── settings.py
-│   ├── database/
-│   ├── domain/
-│   ├── models/
-│   ├── repositories/
-│   ├── schemas/
-│   ├── services/
-│   ├── scanners/
-│   ├── utils/
-│   ├── workers/
-│   └── main.py
-├── alembic/
-├── intel/
-├── tests/
-└── pyproject.toml
-
-frontend/
-├── app/
-├── components/
-├── lib/
-├── public/
-├── services/
-└── types/
-
-docker/
-docs/
-scripts/
+  app/
+    api/
+    core/
+    database/
+    models/
+    repositories/
+    schemas/
+    services/
+  alembic/
+  tests/
 ```
 
-## 8. Organização dos módulos
+## 7. Organização dos módulos
 
 ### Módulo de Sites
 
-Responsável por cadastrar e gerenciar sites para auditoria.
+Responsável por cadastrar e gerenciar sites para auditoria. Atualmente já possui:
 
-Entidades principais:
-- nome
-- URL
-- ambiente
-- empresa
-- categoria
-- tecnologia
-- status
-- data de criação
-- último scan
-- score atual
+- criação
+- leitura
+- atualização
+- exclusão
+- persistência em banco
 
-### Módulo de Empresas
-
-Responsável por representar organizações e seus contextos.
-
-### Módulo de Ativos
-
-Responsável por organizar recursos digitais associados a uma empresa.
-
-### Módulo de Scans
-
-Responsável por executar e registrar varreduras e coletas.
-
-### Módulo de Sinais
-
-Responsável por capturar evidências e eventos observados.
-
-### Módulo de Findings
-
-Responsável por consolidar resultados e evidências em achados estruturados.
-
-### Módulo de Vulnerabilidades
-
-Responsável por associar vulnerabilidades conhecidas e contextos de risco.
-
-### Módulo de Recomendações
-
-Responsável por gerar sugestões de remediação e ação.
-
-### Módulo de Tarefas
-
-Responsável por organizar a execução das recomendações.
-
-## 9. Responsabilidades por camada
-
-### Backend
-
-- expor APIs para frontend e integrações
-- implementar serviços e regras de negócio
-- encapsular acesso a banco, filas e cache
-- orquestrar scanners e processamento assíncrono
-
-### Frontend
-
-- oferecer telas de navegação e gestão
-- apresentar dashboards e resultados
-- consumir APIs e organizar a experiência do usuário
-
-## 10. Modelagem de banco de dados
-
-A base de dados deve ser organizada de forma relacional, com foco em rastreabilidade e evolução modular.
-
-### Entidades principais
+### Módulos futuros
 
 - Empresas
-- Sites
-- Ambientes
-- Categorias
-- Tecnologias
+- Ativos
 - Scans
 - Sinais
 - Findings
 - Vulnerabilidades
 - Recomendações
 - Tarefas
-- Usuários
 
-### Relações esperadas
+## 8. Requisitos técnicos atuais
 
-- uma empresa possui vários sites
-- um site pertence a um ambiente e tecnologia
-- um site pode ter vários scans
-- um scan gera vários sinais
-- um sinal pode originar um ou mais findings
-- um finding pode se relacionar a uma ou mais vulnerabilidades
-- uma recomendação pode gerar tarefas
+- Python 3.9+
+- FastAPI
+- Pydantic
+- SQLAlchemy
+- Alembic
+- pytest
+- SQLite para desenvolvimento local
 
-## 11. APIs necessárias
+## 9. APIs implementadas até o momento
 
 ### Gestão de sites
 
@@ -236,28 +130,21 @@ A base de dados deve ser organizada de forma relacional, com foco em rastreabili
 - PUT /sites/{id}
 - DELETE /sites/{id}
 
-### Gestão de empresas
+### Autenticação básica
 
-- POST /companies
-- GET /companies
-- GET /companies/{id}
-- PUT /companies/{id}
-- DELETE /companies/{id}
+- POST /auth/login
 
-### Gestão de scans
+### Saúde do sistema
 
-- POST /scans
-- GET /scans
-- GET /scans/{id}
+- GET /health
 
-### Gestão de findings e vulnerabilidades
+## 10. Próximos passos arquiteturais
 
-- GET /findings
-- GET /findings/{id}
-- GET /vulnerabilities
-- GET /vulnerabilities/{id}
-
-## 12. Estratégia de autenticação
+- substituir a autenticação básica por JWT real
+- proteger rotas por dependência de token
+- evoluir o modelo de Sites com mais atributos de contexto
+- introduzir o fluxo de scans e sinais
+- preparar a base para integração com frontend e serviços externos
 
 A autenticação deve ser baseada em autenticação segura e escalável, com possibilidade de evolução para múltiplos provedores.
 

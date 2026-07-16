@@ -1,82 +1,99 @@
 # Mouse IA
 
-Mouse IA é uma plataforma profissional de gestão inteligente de vulnerabilidades e superfícies de ataque. A proposta do projeto vai além de um simples scanner de WordPress e evolui para uma solução modular para análise contínua de segurança.
+Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto já passou da fase conceitual para uma base funcional de backend, com foco inicial no módulo de Sites e na evolução do fluxo principal da plataforma.
 
-O projeto está estruturado para começar com o módulo de Sites e, no futuro, expandir para integrações com GitHub, Azure DevOps, GitLab, Docker, Kubernetes, Nginx, Apache, IIS, Linux, Windows, Cloudflare, SSL e DNS.
+## Status atual
+
+A base do projeto já está operacional localmente:
+
+- backend FastAPI com endpoint de saúde
+- CRUD de Sites com persistência em SQLite
+- integração com SQLAlchemy e Alembic
+- endpoint básico de autenticação
+- testes automatizados cobrindo health, Sites e auth
 
 ## Visão geral
 
-Mouse IA foi idealizado para ajudar equipes de segurança a:
+A proposta do Mouse IA é apoiar equipes de segurança com:
 
-- cadastrar e gerenciar ativos digitais
-- coletar sinais e evidências de segurança
-- correlacionar informações e identificar riscos
-- gerar achados, vulnerabilidades e recomendações
-- organizar ações de remediação e acompanhamento
+- cadastro e gestão de ativos digitais
+- coleta e organização de sinais e evidências
+- correlação de risco e contexto operacional
+- geração de achados, vulnerabilidades e recomendações
+- acompanhamento de ações de remediação
 
-O fluxo central da plataforma é:
+O fluxo principal segue a direção:
 
 Asset → Scan → Signals → Correlation Engine → Findings → Vulnerabilities → Recommendations → Tasks
 
-## Status do projeto
+## Requisitos do projeto
 
-O projeto encontra-se em fase inicial de estruturação. A base arquitetural, os diretórios principais e a documentação de referência já foram organizados, com foco no desenvolvimento de uma plataforma escalável e modular.
+- Python 3.9 ou superior
+- ambiente virtual com venv
+- pip
+- SQLite para desenvolvimento local
+- PostgreSQL como alvo de produção futuro
 
-## Arquitetura e organização
+## Stack atual
 
-A solução foi pensada em camadas e módulos, com separação clara entre:
+- FastAPI para APIs
+- Pydantic para validação de dados
+- SQLAlchemy para camada de persistência
+- Alembic para migrações
+- pytest para testes automatizados
+- Uvicorn para execução local
 
-- Backend: APIs, regras de negócio, serviços e integração com dados
-- Frontend: interface para navegação, gestão e visualização
-- Documentação: arquitetura, roadmap, segurança e contexto do produto
-- Infraestrutura: suporte para banco de dados, filas, cache e execução em containers
+## Como executar localmente
+
+1. Entre na pasta do backend.
+2. Crie e ative um ambiente virtual.
+3. Instale as dependências necessárias.
+4. Aplique as migrações.
+5. Execute a aplicação localmente.
+
+Exemplo prático:
+
+```bash
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+pip install fastapi "uvicorn[standard]" pydantic-settings httpx sqlalchemy alembic pytest pytest-cov psycopg2-binary
+alembic upgrade head
+uvicorn app.main:app --reload
+```
 
 ## Estrutura do repositório
 
 ```text
-.
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   ├── core/
-│   │   ├── database/
-│   │   ├── domain/
-│   │   ├── models/
-│   │   ├── repositories/
-│   │   ├── scanners/
-│   │   ├── schemas/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── workers/
-│   │   └── main.py
-│   ├── alembic/
-│   ├── intel/
-│   ├── tests/
-│   └── pyproject.toml
-├── frontend/
-│   ├── app/
-│   ├── components/
-│   ├── lib/
-│   ├── public/
-│   ├── services/
-│   └── types/
-├── docker/
-├── docs/
-├── scripts/
-├── ARCHITECTURE.md
-├── ROADMAP.md
-├── SECURITY.md
-├── SIGNALS.md
-└── CHANGELOG.md
+backend/
+  app/
+    api/
+    core/
+    database/
+    models/
+    repositories/
+    schemas/
+    services/
+  alembic/
+  tests/
+frontend/
+  app/
+  components/
+  lib/
+  public/
+  services/
+  types/
+docs/
+scripts/
 ```
 
-## Principais módulos previstos
+## Módulos em evolução
 
 ### Módulo de Sites
 
-Responsável por cadastrar sites para auditoria, com atributos como nome, URL, ambiente, empresa, categoria, tecnologia, status, data de criação, último scan e score atual.
+Já implementado em sua primeira versão funcional com CRUD, persistência e testes.
 
-### Módulos futuros
+### Próximos módulos previstos
 
 - Empresas
 - Ativos
@@ -86,27 +103,6 @@ Responsável por cadastrar sites para auditoria, com atributos como nome, URL, a
 - Vulnerabilidades
 - Recomendações
 - Tarefas
-- Integrações com ecossistemas externos
-
-## Tecnologias e pilares de desenvolvimento
-
-O projeto foi pensado com foco em:
-
-- Python 3.x com FastAPI
-- PostgreSQL como base principal
-- Alembic para versionamento de schemas
-- arquitetura modular e escalável
-- uso de filas para processamento assíncrono
-- uso de cache para otimização de leitura
-- integração com inteligência artificial como camada de apoio
-- atualização contínua de bases como CVE, NVD, CISA KEV e EPSS
-
-## Como começar
-
-1. Clone o repositório.
-2. Configure as variáveis de ambiente com base no arquivo .env.example.
-3. Estruture o ambiente backend e frontend conforme a evolução do projeto.
-4. Consulte a documentação de arquitetura e roadmap para acompanhar a direção da plataforma.
 
 ## Documentação relacionada
 
@@ -118,12 +114,13 @@ O projeto foi pensado com foco em:
 
 ## Próximos passos
 
-As próximas etapas previstas incluem:
+As próximas etapas prioritárias são:
 
-- implementação do módulo inicial de Sites
-- definição dos modelos e APIs base
-- evolução para o fluxo completo de scan, sinais e findings
-- integração com frontend e infraestrutura operacional
+- fortalecer autenticação com JWT real
+- proteger rotas com autorização
+- evoluir o modelo de Sites para campos adicionais
+- implementar o fluxo de scans e sinais
+- integrar o frontend com as APIs
 
 ## Licença
 

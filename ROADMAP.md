@@ -2,62 +2,73 @@
 
 Este documento organiza a evolução do projeto em fases, com foco em construir uma plataforma modular, escalável e orientada a análise contínua de segurança.
 
-## Fase 0 - Fundação (em andamento)
+## Status atual
+
+A base técnica já está funcional localmente:
+
+- estrutura do backend consolidada
+- módulo de Sites operando com CRUD
+- persistência com SQLAlchemy e Alembic
+- endpoint básico de autenticação
+- testes automatizados em execução
+
+## Fase 0 - Fundação (concluída parcialmente)
 Objetivo: estruturar a base técnica e conceitual do projeto.
 
-- Definir a arquitetura geral do sistema
-- Organizar backend, frontend, documentação e utilidades
-- Estabelecer a base de dados e modelos iniciais
-- Preparar a API principal e os módulos de domínio
-- Definir padrões de segurança, configuração e documentação
+- estrutura inicial do repositório concluída
+- documentação central organizada
+- arquitetura inicial definida
+- base de backend implementada
+- padrões de testes e migrações incorporados
 
-## Fase 1 - Núcleo da plataforma
+## Fase 1 - Núcleo da plataforma (em andamento)
 Objetivo: disponibilizar os blocos centrais para uso e operação.
 
-- Implementar autenticação e autorização
-- Criar gestão de usuários, empresas e ativos
-- Estruturar um dashboard inicial
-- Definir fluxos básicos de navegação e interação
+- evoluir a autenticação para JWT real
+- proteger rotas com autorização
+- criar gestão de usuários e empresas
+- estruturar um dashboard inicial
+- consolidar a experiência de navegação do frontend
 
 ## Fase 2 - Coleta e varredura
 Objetivo: incorporar os primeiros mecanismos de ingestão e análise.
 
-- Desenvolver o fluxo de scan e coleta de sinais
-- Integrar fontes de dados e ativos relevantes
-- Estruturar o processamento inicial de evidências
-- Preparar o pipeline para identificação de achados
+- desenvolver o fluxo de scan e coleta de sinais
+- integrar fontes de dados e ativos relevantes
+- estruturar o processamento inicial de evidências
+- preparar o pipeline para identificação de achados
 
 ## Fase 3 - Inteligência e correlação
 Objetivo: transformar sinais brutos em contexto útil.
 
-- Implementar o motor de correlação de sinais
-- Criar a lógica de identificação de vulnerabilidades
-- Organizar findings e priorização de riscos
-- Definir regras de análise e contexto operacional
+- implementar o motor de correlação de sinais
+- criar a lógica de identificação de vulnerabilidades
+- organizar findings e priorização de riscos
+- definir regras de análise e contexto operacional
 
 ## Fase 4 - IA e recomendações
 Objetivo: ampliar a plataforma com suporte inteligente.
 
-- Integrar recursos de IA para análise e resumo
-- Gerar recomendações baseadas em achados
-- Apoiar a priorização de ações e triagem
-- Melhorar a experiência do usuário com automação assistida
+- integrar recursos de IA para análise e resumo
+- gerar recomendações baseadas em achados
+- apoiar a priorização de ações e triagem
+- melhorar a experiência do usuário com automação assistida
 
 ## Fase 5 - Relatórios e governança
 Objetivo: tornar a plataforma útil para acompanhamento e decisão.
 
-- Criar relatórios claros e estruturados
-- Implementar histórico de eventos e mudanças
-- Organizar configurações e preferências do sistema
-- Adicionar rastreabilidade e auditoria
+- criar relatórios claros e estruturados
+- implementar histórico de eventos e mudanças
+- organizar configurações e preferências do sistema
+- adicionar rastreabilidade e auditoria
 
 ## Fase 6 - Escala e integração
 Objetivo: preparar a plataforma para ambiente real e uso contínuo.
 
-- Documentar a API e os fluxos de integração
-- Melhorar a segurança, observabilidade e deploy
-- Preparar a plataforma para ambientes containerizados
-- Expandir integrações externas e automações
+- documentar a API e os fluxos de integração
+- melhorar a segurança, observabilidade e deploy
+- preparar a plataforma para ambientes containerizados
+- expandir integrações externas e automações
 
 ## Critérios de sucesso
 
@@ -70,4 +81,4 @@ A evolução do projeto será considerada bem-sucedida quando:
 
 ## Status geral
 
-O projeto encontra-se em fase inicial de estruturação, com a base arquitetural definida e as próximas entregas voltadas para o núcleo operacional da plataforma.
+O projeto está em uma fase inicial, porém com uma base funcional que permite evoluir com mais segurança para o núcleo operacional da plataforma.
