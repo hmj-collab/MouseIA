@@ -51,6 +51,12 @@ A plataforma deve utilizar mecanismos seguros de autenticação, com foco em:
 - uso de tokens com expiração controlada e revogação possível
 - proteção contra força bruta e uso indevido de credenciais
 
+#### Implementação atual
+
+O backend emite tokens JWT Bearer assinados com HS256, com expiração de uma hora. A chave deve ser fornecida pela variável de ambiente `JWT_SECRET_KEY` em qualquer ambiente compartilhado ou de produção. Na ausência dela, há uma chave padrão exclusivamente para desenvolvimento local.
+
+Os usuários `admin` e `viewer`, ambos com a senha `password123`, existem apenas para desenvolvimento e testes; não devem ser usados em produção.
+
 ### Autorização
 
 Todas as operações devem respeitar controle de acesso por papel e permissão, especialmente em:
@@ -59,6 +65,8 @@ Todas as operações devem respeitar controle de acesso por papel e permissão, 
 - consulta de achados, vulnerabilidades e relatórios
 - acesso a dados empresariais e operacionais
 - operações administrativas e de configuração
+
+Atualmente, `admin` pode criar, alterar e excluir Sites e criar Signals e Findings. `viewer` pode consultar Sites, Signals e Findings. Todas essas rotas exigem um token Bearer válido.
 
 ## 6. Segurança de APIs
 

@@ -8,19 +8,20 @@ Todas as mudanças relevantes do projeto Mouse IA serão documentadas neste arqu
 - estrutura funcional inicial do backend com FastAPI
 - CRUD do módulo de Sites com persistência em SQLite
 - integração com SQLAlchemy e Alembic
-- endpoint básico de autenticação
-- testes automatizados para health, Sites e auth
-- documentação raiz atualizada para refletir o estado real do projeto
+- autenticação JWT com expiração e suporte a Bearer token
+- autorização por papéis `admin` e `viewer` nas rotas protegidas
+- módulos de Signals e Findings com modelos, schemas, repositórios, serviços, APIs e migrações
+- interface estática de teste para login, Sites e Signals
+- testes automatizados para health, autenticação, autorização, Sites, Signals e Findings
+- documentação raiz atualizada para refletir o estado atual do projeto
 
 ### Changed
-- documentação base refinada para mostrar requisitos, stack atual e próximos passos
-- arquitetura do projeto ajustada para o estágio de implementação atual
+- documentação base e arquitetura refinadas para incluir autenticação, autorização, Signals e Findings
 
 ### Planned
-- autenticação real com JWT
-- proteção de rotas por autorização
-- evolução do fluxo de scans e sinais
-- integração com frontend
+- atualizações, exclusões e filtros para Signals e Findings
+- fluxo automatizado de scans, coleta e correlação de sinais
+- frontend integrado além da interface estática de teste
 
 ## [0.1.0] - 2026-07-16
 

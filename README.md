@@ -1,6 +1,6 @@
 # Mouse IA
 
-Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto já passou da fase conceitual para uma base funcional de backend, com foco inicial no módulo de Sites e na evolução do fluxo principal da plataforma.
+Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto já passou da fase conceitual para uma base funcional de backend, com os módulos de Sites, Signals e Findings e a primeira camada de autenticação e autorização.
 
 ## Status atual
 
@@ -8,9 +8,12 @@ A base do projeto já está operacional localmente:
 
 - backend FastAPI com endpoint de saúde
 - CRUD de Sites com persistência em SQLite
+- criação e consulta de Signals associados opcionalmente a Sites
+- criação e consulta de Findings associados opcionalmente a Signals
 - integração com SQLAlchemy e Alembic
-- endpoint básico de autenticação
-- testes automatizados cobrindo health, Sites e auth
+- autenticação JWT e autorização baseada nos papéis `admin` e `viewer`
+- interface estática de teste para login, Sites e Signals
+- testes automatizados cobrindo health, autenticação, autorização, Sites, Signals e Findings
 
 ## Visão geral
 
@@ -62,6 +65,15 @@ alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
+Em outro terminal, a interface de teste pode ser executada em `http://127.0.0.1:3000`:
+
+```bash
+cd frontend
+npm start
+```
+
+Para o ambiente local, use `admin` ou `viewer` com a senha `password123` para obter um token. Essas credenciais são apenas de desenvolvimento.
+
 ## Estrutura do repositório
 
 ```text
@@ -77,12 +89,8 @@ backend/
   alembic/
   tests/
 frontend/
-  app/
-  components/
-  lib/
-  public/
-  services/
-  types/
+  index.html
+  package.json
 docs/
 scripts/
 ```
@@ -91,15 +99,17 @@ scripts/
 
 ### Módulo de Sites
 
-Já implementado em sua primeira versão funcional com CRUD, persistência e testes.
+Já implementado em sua primeira versão funcional com CRUD, persistência, autenticação e testes.
+
+### Módulos de Signals e Findings
+
+Implementados em sua primeira versão com criação, consulta, persistência e vínculo opcional com Site e Signal, respectivamente. A correlação automática entre eles continua como evolução futura.
 
 ### Próximos módulos previstos
 
 - Empresas
 - Ativos
 - Scans
-- Sinais
-- Findings
 - Vulnerabilidades
 - Recomendações
 - Tarefas
@@ -116,11 +126,10 @@ Já implementado em sua primeira versão funcional com CRUD, persistência e tes
 
 As próximas etapas prioritárias são:
 
-- fortalecer autenticação com JWT real
-- proteger rotas com autorização
 - evoluir o modelo de Sites para campos adicionais
-- implementar o fluxo de scans e sinais
-- integrar o frontend com as APIs
+- implementar os fluxos de atualização e exclusão de Signals e Findings
+- implementar scans e correlação automática de sinais
+- evoluir a interface de teste para um frontend integrado e completo
 
 ## Licença
 

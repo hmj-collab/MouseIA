@@ -69,6 +69,10 @@ São os sinais observados a partir dos dados coletados.
 - confidence: confiança da observação
 - timestamp: momento da detecção
 
+### Implementação atual
+
+O módulo já permite criar e consultar sinais pela API. O registro persistido contém `source`, `signal_type`, `severity`, `confidence`, `description` e um `site_id` opcional. As rotas de leitura exigem autenticação dos papéis `admin` ou `viewer`; a criação exige `admin`.
+
 ### Saída
 - eventos analisáveis
 - insumos para normalização e correlação
@@ -112,6 +116,10 @@ São os achados estruturados gerados a partir dos sinais correlacionados.
 - evidence
 - related_signals
 - status
+
+### Implementação atual
+
+O módulo já permite criar e consultar findings pela API. O registro persistido contém `title`, `description`, `severity`, `status` e um `signal_id` opcional. A geração automática a partir da correlação de sinais ainda não foi implementada.
 
 ### Saída
 - achados normalizados
@@ -187,6 +195,6 @@ Esse pipeline permite que a plataforma:
 - transforme observações técnicas em ações operacionais
 - facilite integração com módulos futuros e fontes externas
 
-## 11. Observação técnica
+## 11. Estado atual e próximos passos
 
-Este documento descreve a lógica conceitual do fluxo de análise do Mouse IA. Em fases futuras, esse pipeline poderá ser expandido para integrar novos módulos, provedores e fontes de dados, mantendo a mesma arquitetura de processamento e normalização.
+Sites, Signals e Findings já possuem persistência e endpoints protegidos. Ainda faltam o módulo de Scan, a coleta automatizada, a correlação, o enriquecimento externo e os módulos de Vulnerabilities, Recommendations e Tasks. O pipeline será expandido mantendo esta arquitetura de processamento e normalização.

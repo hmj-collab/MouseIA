@@ -2,7 +2,7 @@
 
 ## 1. Visão geral
 
-O Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto saiu da fase de estrutura conceitual e já possui uma base funcional de backend, com foco inicial no módulo de Sites.
+O Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades e superfícies de ataque. O projeto saiu da fase de estrutura conceitual e já possui uma base funcional de backend com os módulos de Sites, Signals e Findings.
 
 A proposta continua expandindo para integrações com GitHub, Azure DevOps, GitLab, Docker, Kubernetes, Nginx, Apache, IIS, Linux, Windows, Cloudflare, SSL e DNS.
 
@@ -22,10 +22,13 @@ A base atual já contempla:
 
 - backend FastAPI com rotas principais
 - módulo de Sites com CRUD funcional
+- módulos de Signals e Findings com criação e consulta
 - persistência via SQLAlchemy
 - migrações com Alembic
-- endpoint de autenticação básica
-- testes automatizados para health, Sites e auth
+- autenticação JWT com os papéis `admin` e `viewer`
+- autorização nas rotas de domínio
+- interface estática local para testar login, Sites e Signals
+- testes automatizados para health, autenticação, autorização, Sites, Signals e Findings
 
 ## 4. Princípios de arquitetura
 
@@ -99,13 +102,19 @@ Responsável por cadastrar e gerenciar sites para auditoria. Atualmente já poss
 - exclusão
 - persistência em banco
 
+### Módulo de Signals
+
+Responsável por registrar observações de segurança. Cada sinal possui origem, tipo, severidade, confiança, descrição e vínculo opcional com um Site.
+
+### Módulo de Findings
+
+Responsável por registrar achados estruturados. Cada achado possui título, descrição, severidade, status e vínculo opcional com um Signal.
+
 ### Módulos futuros
 
 - Empresas
 - Ativos
 - Scans
-- Sinais
-- Findings
 - Vulnerabilidades
 - Recomendações
 - Tarefas
@@ -130,9 +139,28 @@ Responsável por cadastrar e gerenciar sites para auditoria. Atualmente já poss
 - PUT /sites/{id}
 - DELETE /sites/{id}
 
-### Autenticação básica
+As operações de leitura aceitam os papéis `admin` e `viewer`; criação, atualização e exclusão requerem `admin`.
+
+### Gestão de signals
+
+- POST /signals
+- GET /signals
+- GET /signals/{id}
+
+### Gestão de findings
+
+- POST /findings
+- GET /findings
+- GET /findings/{id}
+
+Para Signals e Findings, leitura aceita `admin` e `viewer`; criação requer `admin`.
+
+### Autenticação
 
 - POST /auth/login
+- GET /protected
+
+O login emite um token JWT Bearer com expiração de uma hora. Os usuários de desenvolvimento `admin` e `viewer` possuem, respectivamente, os papéis `admin` e `viewer`.
 
 ### Saúde do sistema
 
@@ -140,10 +168,9 @@ Responsável por cadastrar e gerenciar sites para auditoria. Atualmente já poss
 
 ## 10. Próximos passos arquiteturais
 
-- substituir a autenticação básica por JWT real
-- proteger rotas por dependência de token
 - evoluir o modelo de Sites com mais atributos de contexto
-- introduzir o fluxo de scans e sinais
+- introduzir scans e correlação automática de sinais
+- adicionar atualização e exclusão para Signals e Findings
 - preparar a base para integração com frontend e serviços externos
 
 A autenticação deve ser baseada em autenticação segura e escalável, com possibilidade de evolução para múltiplos provedores.

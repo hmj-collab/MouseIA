@@ -7,10 +7,12 @@ Este documento organiza a evolução do projeto em fases, com foco em construir 
 A base técnica já está funcional localmente:
 
 - estrutura do backend consolidada
-- módulo de Sites operando com CRUD
+- módulo de Sites operando com CRUD protegido
+- módulos de Signals e Findings com criação e consulta protegidas
 - persistência com SQLAlchemy e Alembic
-- endpoint básico de autenticação
-- testes automatizados em execução
+- autenticação JWT e autorização por papéis
+- interface estática local de teste
+- testes automatizados em execução para os módulos implementados
 
 ## Fase 0 - Fundação (concluída parcialmente)
 Objetivo: estruturar a base técnica e conceitual do projeto.
@@ -24,26 +26,24 @@ Objetivo: estruturar a base técnica e conceitual do projeto.
 ## Fase 1 - Núcleo da plataforma (em andamento)
 Objetivo: disponibilizar os blocos centrais para uso e operação.
 
-- evoluir a autenticação para JWT real
-- proteger rotas com autorização
 - criar gestão de usuários e empresas
 - estruturar um dashboard inicial
-- consolidar a experiência de navegação do frontend
+- consolidar a experiência de navegação do frontend além da interface de teste atual
 
 ## Fase 2 - Coleta e varredura
 Objetivo: incorporar os primeiros mecanismos de ingestão e análise.
 
-- desenvolver o fluxo de scan e coleta de sinais
+- desenvolver o fluxo de scan e coleta automatizada de sinais
 - integrar fontes de dados e ativos relevantes
 - estruturar o processamento inicial de evidências
-- preparar o pipeline para identificação de achados
+- evoluir o CRUD de Signals e Findings com atualização, exclusão e filtros
 
 ## Fase 3 - Inteligência e correlação
 Objetivo: transformar sinais brutos em contexto útil.
 
 - implementar o motor de correlação de sinais
 - criar a lógica de identificação de vulnerabilidades
-- organizar findings e priorização de riscos
+- organizar a correlação automática de findings e priorização de riscos
 - definir regras de análise e contexto operacional
 
 ## Fase 4 - IA e recomendações
@@ -81,4 +81,4 @@ A evolução do projeto será considerada bem-sucedida quando:
 
 ## Status geral
 
-O projeto está em uma fase inicial, porém com uma base funcional que permite evoluir com mais segurança para o núcleo operacional da plataforma.
+O projeto está em uma fase inicial, porém já possui autenticação e autorização, persistência e os primeiros elementos do pipeline operacional: Sites, Signals e Findings.
