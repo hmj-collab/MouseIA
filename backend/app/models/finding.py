@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
+from app.database.mixins import TimestampMixin
 from app.database.session import Base
 
 
-class Finding(Base):
+class Finding(Base, TimestampMixin):
     __tablename__ = "findings"
 
     id = Column(Integer, primary_key=True, index=True)

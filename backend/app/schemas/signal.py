@@ -20,3 +20,12 @@ class SignalOut(BaseModel):
     confidence: int
     description: Optional[str] = None
     site_id: Optional[int] = None
+
+
+class SignalUpdate(BaseModel):
+    source: Optional[str] = Field(default=None, min_length=1, max_length=80)
+    signal_type: Optional[str] = Field(default=None, min_length=1, max_length=80)
+    severity: Optional[str] = Field(default=None, min_length=1, max_length=40)
+    confidence: Optional[int] = Field(default=None, ge=0, le=100)
+    description: Optional[str] = None
+    site_id: Optional[int] = None

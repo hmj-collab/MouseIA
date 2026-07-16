@@ -20,15 +20,18 @@ Construir uma plataforma escalável, modular e orientada a inteligência artific
 
 A base atual já contempla:
 
-- backend FastAPI com rotas principais
-- módulo de Sites com CRUD funcional
-- módulos de Signals e Findings com criação e consulta
-- persistência via SQLAlchemy
-- migrações com Alembic
+- backend FastAPI estruturado e rotas ativas
+- CRUD de Empresas (`companies`) com restrições de papéis
+- CRUD de Sites com persistência em SQLite
+- CRUD de Ativos (`assets`) e Varreduras (`scans`)
+- Motor síncrono de varredura que analisa alvos HTTP, cabeçalhos expostos e assinaturas (WordPress)
+- CRUD de Sinais (`signals`) e Achados (`findings`) gerados automaticamente de forma encadeada ou criados manualmente
+- persistência unificada via SQLAlchemy carregando todos os modelos do pacote `app.models`
+- migrações em lote com Alembic (`render_as_batch=True` para suporte a SQLite)
 - autenticação JWT com os papéis `admin` e `viewer`
-- autorização nas rotas de domínio
-- interface estática local para testar login, Sites e Signals
-- testes automatizados para health, autenticação, autorização, Sites, Signals e Findings
+- autorização robusta com base em escopos/papéis em todas as rotas de domínio
+- interface estática local simples para testes
+- 20 testes automatizados cobrindo ponta a ponta todos os componentes atuais com 100% de sucesso
 
 ## 4. Princípios de arquitetura
 
@@ -131,6 +134,14 @@ Responsável por registrar achados estruturados. Cada achado possui título, des
 
 ## 9. APIs implementadas até o momento
 
+### Gestão de empresas (Companies)
+
+- POST /companies
+- GET /companies
+- GET /companies/{id}
+- PUT /companies/{id}
+- DELETE /companies/{id}
+
 ### Gestão de sites
 
 - POST /sites
@@ -139,7 +150,22 @@ Responsável por registrar achados estruturados. Cada achado possui título, des
 - PUT /sites/{id}
 - DELETE /sites/{id}
 
-As operações de leitura aceitam os papéis `admin` e `viewer`; criação, atualização e exclusão requerem `admin`.
+### Gestão de ativos (Assets)
+
+- POST /assets
+- GET /assets
+- GET /assets/{id}
+- PUT /assets/{id}
+- DELETE /assets/{id}
+
+### Gestão de varreduras (Scans)
+
+- POST /scans
+- GET /scans
+- GET /scans/{id}
+- PUT /scans/{id}
+- DELETE /scans/{id}
+- POST /scans/{id}/launch (inicia a varredura e gera Sinais/Achados)
 
 ### Gestão de signals
 
@@ -153,11 +179,13 @@ As operações de leitura aceitam os papéis `admin` e `viewer`; criação, atua
 - GET /findings
 - GET /findings/{id}
 
-Para Signals e Findings, leitura aceita `admin` e `viewer`; criação requer `admin`.
+> [!NOTE]
+> Para todas as entidades acima (exceto autenticação e saúde), a leitura (`GET`) aceita os papéis `admin` e `viewer`, enquanto a escrita/modificação (`POST`, `PUT`, `DELETE`, `launch`) exige privilégios de `admin`.
 
 ### Autenticação
 
 - POST /auth/login
+- POST /auth/register
 - GET /protected
 
 O login emite um token JWT Bearer com expiração de uma hora. Os usuários de desenvolvimento `admin` e `viewer` possuem, respectivamente, os papéis `admin` e `viewer`.

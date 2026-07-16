@@ -6,8 +6,10 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from app.core.settings import settings
+
 security = HTTPBearer(auto_error=False)
-SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-secret-key")
+SECRET_KEY = settings.jwt_secret_key
 ALGORITHM = "HS256"
 
 DEFAULT_USERS = {

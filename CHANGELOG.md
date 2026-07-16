@@ -5,23 +5,23 @@ Todas as mudanças relevantes do projeto Mouse IA serão documentadas neste arqu
 ## [Unreleased]
 
 ### Added
-- estrutura funcional inicial do backend com FastAPI
-- CRUD do módulo de Sites com persistência em SQLite
-- integração com SQLAlchemy e Alembic
-- autenticação JWT com expiração e suporte a Bearer token
-- autorização por papéis `admin` e `viewer` nas rotas protegidas
-- módulos de Signals e Findings com modelos, schemas, repositórios, serviços, APIs e migrações
-- interface estática de teste para login, Sites e Signals
-- testes automatizados para health, autenticação, autorização, Sites, Signals e Findings
-- documentação raiz atualizada para refletir o estado atual do projeto
+- CRUD completo do módulo de Empresas (`companies`) integrado às rotas e persistência.
+- CRUD completo do módulo de Ativos (`assets`) e Varreduras (`scans`) com controle de papéis (`admin`/`viewer`).
+- Motor de varredura síncrona no serviço de `scans` que analisa cabeçalhos HTTP (Server, X-Powered-By, HSTS, X-Frame-Options, CSP) e presença de assinaturas WordPress.
+- Mecanismo de *offline fallback* no motor de scans para viabilizar testes e execuções em desenvolvimento local.
+- Integração encadeada automática no pipeline: Varredura ➔ Geração de Sinais (`Signals`) ➔ Geração de Achados (`Findings`).
+- Pacote `app.models` centralizando os modelos SQLAlchemy para evitar erros de tabelas referenciadas ausentes (`NoReferencedTableError`).
+- Suporte a migrações em lote (`render_as_batch=True`) no Alembic para permitir modificações de colunas e constraints no SQLite.
+- Testes automatizados cobrindo CRUD e regras de acesso de Empresas, Ativos, Scans e o pipeline de execução completa (subindo de 15 para 20 testes com 100% de sucesso).
 
 ### Changed
-- documentação base e arquitetura refinadas para incluir autenticação, autorização, Signals e Findings
+- Registro da rota `/companies` ativado em `main.py`.
+- Configuração do template do Alembic (`script.py.mako`) corrigida para incluir definições explícitas de chaves de revisão.
 
 ### Planned
-- atualizações, exclusões e filtros para Signals e Findings
-- fluxo automatizado de scans, coleta e correlação de sinais
-- frontend integrado além da interface estática de teste
+- frontend integrado moderno em React/Vite (próxima etapa de desenvolvimento).
+- atualizações, exclusões e filtros avançados para Signals e Findings.
+- motor de correlação (Fase 3) e enriquecimento de vulnerabilidades (CVE/NVD/CISA KEV/EPSS).
 
 ## [0.1.0] - 2026-07-16
 

@@ -4,16 +4,20 @@ Mouse IA é uma plataforma modular para gestão inteligente de vulnerabilidades 
 
 ## Status atual
 
-A base do projeto já está operacional localmente:
+A base do projeto está totalmente operacional localmente e com migrações de banco alinhadas:
 
-- backend FastAPI com endpoint de saúde
+- Backend FastAPI com endpoint de saúde
+- CRUD de Empresas (`Companies`) com permissões `admin`/`viewer`
 - CRUD de Sites com persistência em SQLite
-- criação e consulta de Signals associados opcionalmente a Sites
-- criação e consulta de Findings associados opcionalmente a Signals
-- integração com SQLAlchemy e Alembic
-- autenticação JWT e autorização baseada nos papéis `admin` e `viewer`
-- interface estática de teste para login, Sites e Signals
-- testes automatizados cobrindo health, autenticação, autorização, Sites, Signals e Findings
+- CRUD de Ativos (`Assets`) e Varreduras (`Scans`)
+- Motor de varredura síncrono que analisa alvos HTTP, vazamento de cabeçalhos e tecnologias (WordPress)
+- Geração automática encadeada no pipeline: Scan ➔ Signals ➔ Findings
+- Criação e consulta de Signals associados a Sites
+- Criação e consulta de Findings associados a Signals
+- Integração robusta com SQLAlchemy e migrações do Alembic (suporte a batch mode para SQLite)
+- Autenticação JWT e autorização por cargo (`admin` e `viewer`)
+- Interface estática simplificada de teste local
+- 20 testes automatizados cobrindo saúde, autenticação, autorização, Sites, Usuários, Empresas, Ativos, Scans, Sinais e Achados.
 
 ## Visão geral
 
@@ -126,10 +130,10 @@ Implementados em sua primeira versão com criação, consulta, persistência e v
 
 As próximas etapas prioritárias são:
 
-- evoluir o modelo de Sites para campos adicionais
-- implementar os fluxos de atualização e exclusão de Signals e Findings
-- implementar scans e correlação automática de sinais
-- evoluir a interface de teste para um frontend integrado e completo
+- construir um frontend integrado completo (Vite + React) no diretório `/frontend`
+- implementar o motor de correlação (Fase 3) conectando achados a bases de vulnerabilidades (CVE/NVD)
+- adicionar filtros e paginação avançados nas APIs de Sinais e Achados
+- introduzir suporte assíncrono para scans pesados por meio de filas (Celery/Redis)
 
 ## Licença
 

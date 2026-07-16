@@ -14,29 +14,29 @@ A base técnica já está funcional localmente:
 - interface estática local de teste
 - testes automatizados em execução para os módulos implementados
 
-## Fase 0 - Fundação (concluída parcialmente)
+## Fase 0 - Fundação (100% Concluída)
 Objetivo: estruturar a base técnica e conceitual do projeto.
 
-- estrutura inicial do repositório concluída
-- documentação central organizada
-- arquitetura inicial definida
-- base de backend implementada
-- padrões de testes e migrações incorporados
+- [x] estrutura inicial do repositório concluída
+- [x] documentação central organizada
+- [x] arquitetura inicial definida
+- [x] base de backend implementada
+- [x] padrões de testes e migrações em lote incorporados
 
 ## Fase 1 - Núcleo da plataforma (em andamento)
 Objetivo: disponibilizar os blocos centrais para uso e operação.
 
-- criar gestão de usuários e empresas
-- estruturar um dashboard inicial
-- consolidar a experiência de navegação do frontend além da interface de teste atual
+- [x] criar gestão de usuários e empresas (concluída no backend e testada)
+- [ ] estruturar um dashboard inicial
+- [ ] consolidar a experiência de navegação do frontend além da interface de teste atual
 
-## Fase 2 - Coleta e varredura
+## Fase 2 - Coleta e varredura (em andamento)
 Objetivo: incorporar os primeiros mecanismos de ingestão e análise.
 
-- desenvolver o fluxo de scan e coleta automatizada de sinais
-- integrar fontes de dados e ativos relevantes
-- estruturar o processamento inicial de evidências
-- evoluir o CRUD de Signals e Findings com atualização, exclusão e filtros
+- [x] desenvolver o fluxo de scan e coleta automatizada de sinais (motor síncrono integrado)
+- [x] integrar fontes de dados e ativos relevantes (`Assets` e `Scans` CRUDs)
+- [x] estruturar o processamento inicial de evidências (Varredura ➔ Sinais ➔ Achados)
+- [ ] evoluir o CRUD de Signals e Findings com atualização, exclusão e filtros avançados
 
 ## Fase 3 - Inteligência e correlação
 Objetivo: transformar sinais brutos em contexto útil.

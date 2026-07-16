@@ -15,6 +15,34 @@ def test_findings_crud_flow() -> None:
     token = login_response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
+    site_response = client.post(
+        "/sites",
+        json={
+            "name": "Finding Test Site",
+            "url": "https://finding-test.local",
+            "description": "Site para testes de findings",
+            "tags": ["test"],
+        },
+        headers=headers,
+    )
+    assert site_response.status_code == 201
+    site_id = site_response.json()["id"]
+
+    signal_response = client.post(
+        "/signals",
+        json={
+            "source": "scanner",
+            "signal_type": "http",
+            "severity": "medium",
+            "confidence": 60,
+            "description": "HTTP discrepancy detected",
+            "site_id": site_id,
+        },
+        headers=headers,
+    )
+    assert signal_response.status_code == 201
+    signal_id = signal_response.json()["id"]
+
     create_response = client.post(
         "/findings",
         json={
@@ -22,7 +50,7 @@ def test_findings_crud_flow() -> None:
             "description": "The site is exposing an outdated TLS version.",
             "severity": "high",
             "status": "open",
-            "signal_id": 1,
+            "signal_id": signal_id,
         },
         headers=headers,
     )
@@ -30,7 +58,27 @@ def test_findings_crud_flow() -> None:
     assert create_response.status_code == 201
     created = create_response.json()
     assert created["title"] == "Outdated TLS configuration"
+    assert created["signal_id"] == signal_id
 
-    list_response = client.get("/findings", headers=headers)
+    update_response = client.put(
+        f"/findings/{created['id']}",
+        json={
+            "status": "closed",
+            "severity": "critical",
+        },
+        headers=headers,
+    )
+    assert update_response.status_code == 200
+    updated = update_response.json()
+    assert updated["status"] == "closed"
+    assert updated["severity"] == "critical"
+
+    list_response = client.get(f"/findings?status=closed&signal_id={signal_id}", headers=headers)
     assert list_response.status_code == 200
     assert any(item["id"] == created["id"] for item in list_response.json())
+
+    delete_response = client.delete(f"/findings/{created['id']}", headers=headers)
+    assert delete_response.status_code == 204
+
+    get_response = client.get(f"/findings/{created['id']}", headers=headers)
+    assert get_response.status_code == 404

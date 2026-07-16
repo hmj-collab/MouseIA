@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.signal import Signal as SignalModel
 from app.repositories.signal_repository import SignalRepository
-from app.schemas.signal import SignalCreate, SignalOut
+from app.schemas.signal import SignalCreate, SignalOut, SignalUpdate
 
 
 class SignalService:
@@ -14,8 +14,23 @@ class SignalService:
     def _repository(self) -> SignalRepository:
         return SignalRepository(self.db)
 
-    def list_signals(self) -> list[SignalOut]:
-        signals = self._repository().list_signals()
+    def list_signals(
+        self,
+        source: Optional[str] = None,
+        signal_type: Optional[str] = None,
+        severity: Optional[str] = None,
+        site_id: Optional[int] = None,
+        min_confidence: Optional[int] = None,
+        max_confidence: Optional[int] = None,
+    ) -> list[SignalOut]:
+        signals = self._repository().list_signals(
+            source=source,
+            signal_type=signal_type,
+            severity=severity,
+            site_id=site_id,
+            min_confidence=min_confidence,
+            max_confidence=max_confidence,
+        )
         return [self._to_out(signal) for signal in signals]
 
     def create_signal(self, payload: SignalCreate) -> SignalOut:
@@ -27,6 +42,15 @@ class SignalService:
         if signal is None:
             return None
         return self._to_out(signal)
+
+    def update_signal(self, signal_id: int, payload: SignalUpdate) -> Optional[SignalOut]:
+        signal = self._repository().update_signal(signal_id, payload)
+        if signal is None:
+            return None
+        return self._to_out(signal)
+
+    def delete_signal(self, signal_id: int) -> bool:
+        return self._repository().delete_signal(signal_id)
 
     def _to_out(self, signal: SignalModel) -> SignalOut:
         return SignalOut(

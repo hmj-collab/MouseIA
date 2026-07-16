@@ -1,9 +1,11 @@
-from sqlalchemy import JSON, Column, Integer, String, Text
+from sqlalchemy import JSON, Column, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
+from app.database.mixins import TimestampMixin
 from app.database.session import Base
 
 
-class Site(Base):
+class Site(Base, TimestampMixin):
     __tablename__ = "sites"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -11,3 +13,6 @@ class Site(Base):
     url = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     tags = Column(JSON, nullable=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+
+    company = relationship("Company", backref="sites")
