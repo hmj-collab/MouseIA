@@ -8,6 +8,7 @@ export default function SignalsFindings({ user }) {
   const [signals, setSignals] = useState([]);
   const [findings, setFindings] = useState([]);
   const [sites, setSites] = useState([]);
+  const [vulnerabilities, setVulnerabilities] = useState([]);
 
   // Filtering / Tabs
   const [activeTab, setActiveTab] = useState('findings'); // 'findings' or 'signals'
@@ -21,14 +22,16 @@ export default function SignalsFindings({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [signalsData, findingsData, sitesData] = await Promise.all([
+      const [signalsData, findingsData, sitesData, vulnsData] = await Promise.all([
         api.getSignals(),
         api.getFindings(),
-        api.getSites()
+        api.getSites(),
+        api.getVulnerabilities()
       ]);
       setSignals(signalsData);
       setFindings(findingsData);
       setSites(sitesData);
+      setVulnerabilities(vulnsData);
     } catch (err) {
       console.error("Erro ao carregar sinais e achados", err);
     } finally {
@@ -144,7 +147,7 @@ export default function SignalsFindings({ user }) {
           style={{ borderBottom: activeTab === 'findings' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('findings')}
         >
-          <ShieldAlert size={18} /> Achados Estruturados ({filteredFindings.length})
+          <ShieldAlert size={18} /> Detectados ({filteredFindings.length})
         </button>
         <button
           className="nav-item"
@@ -160,7 +163,7 @@ export default function SignalsFindings({ user }) {
         <div className="glass-card" style={{ overflow: 'hidden' }}>
           {filteredFindings.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhum achado estruturado encontrado para os filtros atuais.
+              Nenhum detectado encontrado para os filtros atuais.
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -291,7 +294,7 @@ export default function SignalsFindings({ user }) {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                {selectedType === 'finding' ? `Detalhes do Achado #${selectedItem.id}` : `Detalhes do Sinal #${selectedItem.id}`}
+                Detalhes #{selectedItem.id}
               </h2>
               <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setSelectedItem(null)}>
                 <X size={20} />
@@ -335,6 +338,46 @@ export default function SignalsFindings({ user }) {
                     color: 'var(--text-primary)',
                     fontFamily: 'monospace'
                   }}>{selectedItem.description || 'Sem descrição.'}</pre>
+                </div>
+
+                {/* Linked Vulnerability correlation details */}
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginTop: '1.5rem' }}>
+                  <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <ShieldAlert size={16} style={{ color: 'var(--color-primary)' }} /> Vulnerabilidades Correlacionadas (CVE / CVSS)
+                  </h3>
+                  {vulnerabilities.filter(v => v.finding_id === selectedItem.id).length === 0 ? (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                      Nenhuma vulnerabilidade ou CVE publicada correlacionada a este item.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                      {vulnerabilities.filter(v => v.finding_id === selectedItem.id).map(vuln => (
+                        <div key={vuln.id} style={{
+                          padding: '1rem',
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--border-color)',
+                          borderRadius: '8px'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--color-primary)' }}>
+                              {vuln.cve_id || 'Mapeamento-Local'}
+                            </span>
+                            {vuln.cvss_score && (
+                              <span style={{ fontSize: '0.8rem', fontWeight: 700, color: vuln.cvss_score >= 7.0 ? 'var(--color-danger)' : 'var(--color-warning)' }}>
+                                CVSS: {vuln.cvss_score.toFixed(1)} ({vuln.severity})
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                            {vuln.title}
+                          </div>
+                          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.4' }}>
+                            {vuln.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (

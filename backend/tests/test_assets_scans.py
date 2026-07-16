@@ -147,7 +147,7 @@ def test_scans_crud_flow_and_execution() -> None:
     created_sig_ids = {sig["id"] for sig in site_signals}
     linked_findings = [f for f in findings if f["signal_id"] in created_sig_ids]
     assert len(linked_findings) > 0
-    assert any("Achado" in f["title"] for f in linked_findings)
+    assert any("Detectado" in f["title"] for f in linked_findings)
 
     # 8. Delete Scan and Site
     delete_scan_resp = client.delete(f"/scans/{scan_id}", headers=headers)

@@ -283,7 +283,7 @@ class ScanService:
 
             # For each signal, create a finding
             finding = FindingModel(
-                title=f"Achado: {sig_data['type']}",
+                title=f"Detectado: {sig_data['type']}",
                 description=sig_data["desc"],
                 severity=sig_data["severity"],
                 status="open",
