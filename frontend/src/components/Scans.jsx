@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Play, RefreshCw, Trash2, Database, ShieldAlert, Plus, X, Globe,
   Shield, CheckCircle, Clock, AlertTriangle, ExternalLink
@@ -380,7 +381,7 @@ export default function Scans({ user }) {
       )}
 
       {/* ASSET MODAL */}
-      {showAssetModal && (
+      {showAssetModal && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -477,11 +478,12 @@ export default function Scans({ user }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* SCAN MODAL */}
-      {showScanModal && (
+      {showScanModal && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -565,7 +567,8 @@ export default function Scans({ user }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Trash2, Edit2, Globe, Building2, ExternalLink, X, Check } from 'lucide-react';
 import api from '../services/api';
 
@@ -333,7 +334,7 @@ export default function Sites({ user }) {
       )}
 
       {/* SITES MODAL */}
-      {showSiteModal && (
+      {showSiteModal && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -413,11 +414,12 @@ export default function Sites({ user }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* COMPANIES MODAL */}
-      {showCompanyModal && (
+      {showCompanyModal && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -484,7 +486,8 @@ export default function Sites({ user }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

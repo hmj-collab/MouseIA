@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ShieldAlert, AlertTriangle, AlertCircle, RefreshCw, Server, HelpCircle, Eye } from 'lucide-react';
 import api from '../services/api';
 
@@ -279,7 +280,7 @@ export default function SignalsFindings({ user }) {
       )}
 
       {/* DETAIL MODAL */}
-      {selectedItem && (
+      {selectedItem && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -385,7 +386,8 @@ export default function SignalsFindings({ user }) {
               <button className="primary" onClick={() => setSelectedItem(null)}>Fechar</button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
