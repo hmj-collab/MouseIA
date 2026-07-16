@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mouse IA - Test UI</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 2rem; background: #0f172a; color: #e2e8f0; }
+      .card { background: #111827; padding: 1rem 1.25rem; border-radius: 10px; margin-bottom: 1rem; }
+      input, button, select, textarea { display: block; width: 100%; margin-top: 0.5rem; padding: 0.6rem; border-radius: 6px; border: 1px solid #334155; }
+      button { cursor: pointer; background: #2563eb; color: white; border: none; }
+      pre { background: #020617; padding: 1rem; border-radius: 8px; overflow: auto; }
+      .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+      .col { flex: 1; min-width: 280px; }
+    </style>
+  </head>
+  <body>
+    <h1>Mouse IA — UI de teste</h1>
+    <div class="card">
+      <h2>Login</h2>
+      <input id="username" placeholder="username" value="admin" />
+      <input id="password" placeholder="password" value="password123" type="password" />
+      <button onclick="login()">Entrar</button>
+      <pre id="loginOutput">Aguardando login...</pre>
+    </div>
+
+    <div class="row">
+      <div class="col card">
+        <h2>Sites</h2>
+        <button onclick="loadSites()">Listar Sites</button>
+        <pre id="sitesOutput">Nenhum dado carregado.</pre>
+      </div>
+      <div class="col card">
+        <h2>Signals</h2>
+        <button onclick="loadSignals()">Listar Signals</button>
+        <pre id="signalsOutput">Nenhum dado carregado.</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Adicionar Signal</h2>
+      <input id="signalSource" placeholder="source" value="manual-ui" />
+      <input id="signalType" placeholder="signal_type" value="tls" />
+      <input id="signalSeverity" placeholder="severity" value="medium" />
+      <input id="signalConfidence" placeholder="confidence" type="number" value="75" />
+      <textarea id="signalDescription" placeholder="description">Sinal criado via UI</textarea>
+      <button onclick="createSignal()">Criar Signal</button>
+      <pre id="signalCreateOutput">Aguardando criação...</pre>
+    </div>
+
+    <script>
+      let token = '';
+      const apiBase = 'http://127.0.0.1:8000';
+
+      async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const output = document.getElementById('loginOutput');
+
+        try {
+          const response = await fetch(`${apiBase}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+          });
+          const data = await response.json();
+          token = data.access_token || '';
+          output.textContent = JSON.stringify({ status: response.status, data }, null, 2);
+        } catch (error) {
+          output.textContent = `Erro: ${error.message}`;
+        }
+      }
+
+      async function loadSites() {
+        const output = document.getElementById('sitesOutput');
+        if (!token) {
+          output.textContent = 'Faça login primeiro.';
+          return;
+        }
+        try {
+          const response = await fetch(`${apiBase}/sites`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await response.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          output.textContent = `Erro: ${error.message}`;
+        }
+      }
+
+      async function loadSignals() {
+        const output = document.getElementById('signalsOutput');
+        if (!token) {
+          output.textContent = 'Faça login primeiro.';
+          return;
+        }
+        try {
+          const response = await fetch(`${apiBase}/signals`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const data = await response.json();
+          output.textContent = JSON.stringify(data, null, 2);
+        } catch (error) {
+          output.textContent = `Erro: ${error.message}`;
+        }
+      }
+
+      async function createSignal() {
+        const output = document.getElementById('signalCreateOutput');
+        if (!token) {
+          output.textContent = 'Faça login primeiro.';
+          return;
+        }
+        try {
+          const response = await fetch(`${apiBase}/signals`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              source: document.getElementById('signalSource').value,
+              signal_type: document.getElementById('signalType').value,
+              severity: document.getElementById('signalSeverity').value,
+              confidence: Number(document.getElementById('signalConfidence').value),
+              description: document.getElementById('signalDescription').value
+            })
+          });
+          const data = await response.json();
+          output.textContent = JSON.stringify({ status: response.status, data }, null, 2);
+        } catch (error) {
+          output.textContent = `Erro: ${error.message}`;
+        }
+      }
+    </script>
+  </body>
+</html>
