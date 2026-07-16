@@ -197,8 +197,11 @@ export default function Vulnerabilities({ user }) {
         /* VULNERABILITIES LIST */
         <div className="glass-card" style={{ overflow: 'hidden' }}>
           {filteredVulns.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhuma vulnerabilidade cadastrada ou detectada para os filtros atuais.
+            <div style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-primary)' }}>Nenhuma vulnerabilidade detectada ainda</div>
+              <p style={{ maxWidth: '500px', margin: '0 auto 1.5rem', fontSize: '0.875rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
+                As vulnerabilidades são geradas dinamicamente após a execução de uma varredura. Vá até a aba "Varreduras" e clique em "Iniciar" para analisar um site em escopo.
+              </p>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -284,8 +287,11 @@ export default function Vulnerabilities({ user }) {
         /* RECOMMENDATIONS LIST */
         <div className="grid-cols-2">
           {recommendations.length === 0 ? (
-            <div className="glass-card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)', gridColumn: 'span 2' }}>
-              Nenhum plano de recomendação gerado ainda.
+            <div className="glass-card" style={{ padding: '4rem 2rem', textAlign: 'center', color: 'var(--text-secondary)', gridColumn: 'span 2' }}>
+              <div style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--color-success)' }}>Nenhuma recomendação de mitigação ativa</div>
+              <p style={{ maxWidth: '500px', margin: '0 auto', fontSize: '0.875rem', lineHeight: '1.5', color: 'var(--text-muted)' }}>
+                Os planos de ação com recomendações prioritárias serão exibidos aqui assim que vulnerabilidades forem identificadas durante os escaneamentos ativos.
+              </p>
             </div>
           ) : (
             recommendations.map(rec => (
