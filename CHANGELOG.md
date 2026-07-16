@@ -14,16 +14,21 @@ Todas as mudanças relevantes do projeto Mouse IA serão documentadas neste arqu
 - Suporte a migrações em lote (`render_as_batch=True`) no Alembic para permitir modificações de colunas e constraints no SQLite.
 - Testes automatizados cobrindo CRUD e regras de acesso de Empresas, Ativos, Scans e o pipeline de execução completa (subindo de 15 para 20 testes com 100% de sucesso).
 - Frontend moderno (Single Page Application) em Vite + React + Lucide Icons construído com CSS customizado (sem Tailwind), contendo Dashboard interativo, gestão de escopo, gerenciamento de ativos/scans e painel de análise de ameaças.
+- Motor de correlação de vulnerabilidades (`vulnerabilities`) e geração automática de planos de mitigação (`recommendations`) a partir de achados e assinaturas detectadas nas varreduras.
+- Novas rotas de API `/vulnerabilities` e `/recommendations` com controle de acesso baseado em papéis (Viewer/Admin) no backend.
+- Tela dedicada "Análise e Mitigação" no frontend para inspeção de vulnerabilidades, visualização de scores CVSS e CVEs correlacionadas, e triagem de status.
+- Teste de integração automatizado `test_vulnerabilities_recs.py` adicionado, elevando o backend para 21/21 testes cobertos com 100% de sucesso.
 
 ### Changed
 - Registro da rota `/companies` ativado em `main.py`.
 - Configuração do template do Alembic (`script.py.mako`) corrigida para incluir definições explícitas de chaves de revisão.
 - Ajuste nas configurações de CORS no backend para permitir solicitações de origem cruzada a partir do porto `5173` do Vite.
+- Correção crítica nas camadas de esquema, repositório e mapeamento de Sites para suportar a associação de `company_id` de forma correta ao criar/editar sites.
 
 ### Planned
 - atualizações, exclusões e filtros avançados para Signals e Findings.
-- motor de correlação (Fase 3) e enriquecimento de vulnerabilidades (CVE/NVD/CISA KEV/EPSS).
 - suporte assíncrono para scans pesados por meio de filas (Celery/Redis).
+- motor de inteligência artificial generativa para geração de relatórios contextuais.
 
 ## [0.1.0] - 2026-07-16
 

@@ -38,13 +38,13 @@ Objetivo: incorporar os primeiros mecanismos de ingestão e análise.
 - [x] estruturar o processamento inicial de evidências (Varredura ➔ Sinais ➔ Achados)
 - [ ] evoluir o CRUD de Signals e Findings com atualização, exclusão e filtros avançados
 
-## Fase 3 - Inteligência e correlação
+## Fase 3 - Inteligência e correlação (100% Concluída)
 Objetivo: transformar sinais brutos em contexto útil.
 
-- implementar o motor de correlação de sinais
-- criar a lógica de identificação de vulnerabilidades
-- organizar a correlação automática de findings e priorização de riscos
-- definir regras de análise e contexto operacional
+- [x] implementar o motor de correlação de sinais (Vulnerabilidades automáticas baseadas em sinais/achados)
+- [x] criar a lógica de identificação de vulnerabilidades (CVE/CVSS associados)
+- [x] organizar a correlação automática de findings e priorização de riscos (Recommendations associadas)
+- [x] definir regras de análise e contexto operacional (Filtros por criticidade e atualizações de status via painel)
 
 ## Fase 4 - IA e recomendações
 Objetivo: ampliar a plataforma com suporte inteligente.
