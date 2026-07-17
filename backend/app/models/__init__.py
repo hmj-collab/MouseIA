@@ -8,6 +8,7 @@ from app.models.scan import Scan
 from app.models.vulnerability import Vulnerability
 from app.models.recommendation import Recommendation
 from app.models.task import Task
+from app.models.cve_intelligence import CveIntelligence
 
 __all__ = [
     "Organization",
@@ -20,4 +21,6 @@ __all__ = [
     "Vulnerability",
     "Recommendation",
     "Task",
+    "CveIntelligence",
 ]
+

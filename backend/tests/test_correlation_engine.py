@@ -79,3 +79,52 @@ def test_correlation_engine_grouping_and_deduplication(db_session: Session) -> N
     signals_in_db_updated = db_session.query(Signal).filter(Signal.finding_id == finding_1.id).all()
     assert len(signals_in_db_updated) == 4
     assert any(s.signal_type == "missing_x_frame_options" for s in signals_in_db_updated)
+
+    # Verify that the updated vulnerability has a calculated risk score
+    vuln_updated = db_session.query(Vulnerability).filter(Vulnerability.finding_id == finding_1.id).first()
+    assert vuln_updated.risk_score is not None
+    assert vuln_updated.risk_score > 0.0
+
+
+def test_threat_intel_enrichment(db_session: Session) -> None:
+    # 1. Create a production asset (should trigger high asset weight = 10.0)
+    from app.models.asset import Asset
+    asset = Asset(
+        name="Produção Principal Asset",
+        asset_type="web_application",
+        value="http://wordpress-prod.local",
+        description="Ambiente de producao principal",
+        is_active=True,
+    )
+    db_session.add(asset)
+    db_session.commit()
+    db_session.refresh(asset)
+
+    correlation_svc = CorrelationService(db_session)
+
+    # 2. Send WordPress signals that map to CVE-2023-32243
+    signals_batch = [
+        {"type": "wordpress_detected", "severity": "critical", "confidence": 100, "desc": "WordPress installation detected"},
+    ]
+
+    findings = correlation_svc.process_new_signals(
+        signals_data=signals_batch,
+        asset_id=asset.id,
+        source="scan-wordpress"
+    )
+
+    assert len(findings) == 1
+    finding = findings[0]
+
+    # Verify that the Vulnerability was enriched with CVSS, EPSS, and KEV metrics
+    vuln = db_session.query(Vulnerability).filter(Vulnerability.finding_id == finding.id).first()
+    assert vuln is not None
+    assert vuln.cve_id == "CVE-2023-32243"
+    assert vuln.cvss_score == 8.8
+    assert vuln.severity == "critical"
+    
+    # Assert custom Risk Score is calculated:
+    # CVSS (8.8 * 0.5 = 4.4) + EPSS (approx 0.75-0.95 * 2 = 1.5-1.9) + KEV (10 * 0.2 = 2.0) + Asset weight (10 * 0.1 = 1.0) = ~8.9 - 9.3
+    assert 8.5 <= vuln.risk_score <= 10.0
+
+

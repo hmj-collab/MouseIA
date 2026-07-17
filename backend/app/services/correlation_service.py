@@ -308,13 +308,51 @@ class CorrelationService:
                 "rec_priority": "medium" if finding.severity == "medium" else "low"
             }
 
+        # Resolve CVSS, Severity and Risk Score from Threat Intelligence if cve_id is present
+        cve_id = matched_rule.get("cve_id")
+        cvss_score = matched_rule.get("cvss_score")
+        severity = matched_rule.get("severity") or finding.severity
+        risk_score = None
+
+        if cve_id:
+            try:
+                from app.services.threat_intel_service import ThreatIntelService
+                intel_svc = ThreatIntelService(self.db)
+                cve_intel = intel_svc.get_cve_intelligence(cve_id, default_cvss=cvss_score, default_severity=severity)
+                cvss_score = cve_intel.cvss_score
+                severity = cve_intel.severity
+                risk_score = intel_svc.calculate_risk_score(
+                    cvss=cve_intel.cvss_score or 5.0,
+                    epss=cve_intel.epss_score or 0.01,
+                    is_kev=cve_intel.is_kev,
+                    asset_id=asset_id
+                )
+            except Exception:
+                pass
+
+        # Calculate a basic risk score if it couldn't be resolved or if it's a general finding without CVE
+        if risk_score is None:
+            try:
+                from app.services.threat_intel_service import ThreatIntelService
+                intel_svc = ThreatIntelService(self.db)
+                fallback_cvss = cvss_score or (9.0 if severity == "critical" else 7.5 if severity == "high" else 5.0 if severity == "medium" else 2.5 if severity == "low" else 1.0)
+                risk_score = intel_svc.calculate_risk_score(
+                    cvss=fallback_cvss,
+                    epss=0.0,
+                    is_kev=False,
+                    asset_id=asset_id
+                )
+            except Exception:
+                risk_score = cvss_score or 5.0
+
         # Check if a vulnerability already exists for this finding
         existing_vuln = self.db.query(Vulnerability).filter(Vulnerability.finding_id == finding.id).first()
         if existing_vuln:
             # Update existing vulnerability & recommendation
             existing_vuln.description = matched_rule["description"]
-            existing_vuln.severity = matched_rule["severity"]
-            existing_vuln.cvss_score = matched_rule.get("cvss_score")
+            existing_vuln.severity = severity
+            existing_vuln.cvss_score = cvss_score
+            existing_vuln.risk_score = risk_score
             
             existing_rec = self.db.query(Recommendation).filter(Recommendation.vulnerability_id == existing_vuln.id).first()
             if existing_rec:
@@ -327,9 +365,10 @@ class CorrelationService:
         vuln = Vulnerability(
             title=matched_rule["title"],
             description=matched_rule["description"],
-            severity=matched_rule["severity"],
-            cvss_score=matched_rule.get("cvss_score"),
-            cve_id=matched_rule.get("cve_id"),
+            severity=severity,
+            cvss_score=cvss_score,
+            risk_score=risk_score,
+            cve_id=cve_id,
             status="open",
             asset_id=asset_id,
             finding_id=finding.id
