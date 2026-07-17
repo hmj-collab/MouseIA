@@ -41,6 +41,8 @@ class WPScanProvider(BaseProvider):
                     "--url", target_url, 
                     "--format", "json", 
                     "--disable-tls-checks",
+                    "--stealthy",
+                    "--force",
                     "--enumerate", "u,p,t"
                 ]
             elif os.path.exists(local_exe) and shutil.which("ruby") is not None:
@@ -56,12 +58,15 @@ class WPScanProvider(BaseProvider):
                     "--url", target_url,
                     "--format", "json",
                     "--disable-tls-checks",
+                    "--stealthy",
+                    "--force",
                     "--enumerate", "u,p,t"
                 ]
+
             else:
                 return signals
 
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=360)
 
             if result.returncode not in (0, 5):  # 5 is returned by wpscan when vulnerabilities are found
                 log_callback("ERROR", f"Falha na execução do WPScan (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
