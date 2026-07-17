@@ -9,6 +9,8 @@ from app.models.vulnerability import Vulnerability
 from app.models.recommendation import Recommendation
 from app.models.task import Task
 from app.models.cve_intelligence import CveIntelligence
+from app.models.audit_log import AuditLog
+from app.models.webhook import Webhook
 
 __all__ = [
     "Organization",
@@ -22,5 +24,8 @@ __all__ = [
     "Recommendation",
     "Task",
     "CveIntelligence",
+    "AuditLog",
+    "Webhook",
 ]
+
 
