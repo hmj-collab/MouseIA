@@ -8,6 +8,8 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     organization_id: Optional[int] = None
+    url: Optional[str] = None
+
 
 
 class ProjectUpdate(BaseModel):
@@ -15,6 +17,8 @@ class ProjectUpdate(BaseModel):
     description: Optional[str] = None
     tags: Optional[list[str]] = None
     organization_id: Optional[int] = None
+    url: Optional[str] = None
+
 
 
 class ProjectOut(BaseModel):
@@ -23,5 +27,7 @@ class ProjectOut(BaseModel):
     description: Optional[str] = None
     tags: list[str] = Field(default_factory=list)
     organization_id: Optional[int] = None
+    url: Optional[str] = None
+
 
     model_config = {"from_attributes": True}

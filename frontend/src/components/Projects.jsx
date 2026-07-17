@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, Edit2, Globe, Building2, X, Check, ShieldAlert } from 'lucide-react';
+import { Plus, Trash2, Edit2, Globe, Building2, X, Check } from 'lucide-react';
 import api from '../services/api';
 
 export default function Projects({ user }) {
@@ -8,33 +8,27 @@ export default function Projects({ user }) {
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState([]);
   const [organizations, setOrganizations] = useState([]);
-  const [assets, setAssets] = useState([]);
 
   // Modals / Forms States
   const [showProjectModal, setShowProjectModal] = useState(false);
-  const [projectForm, setProjectForm] = useState({ id: null, name: '', description: '', tags: '', organization_id: '' });
+  const [projectForm, setProjectForm] = useState({ id: null, name: '', description: '', tags: '', organization_id: '', url: '' });
 
   const [showOrganizationModal, setShowOrganizationModal] = useState(false);
   const [organizationForm, setOrganizationForm] = useState({ id: null, name: '', domain: '', description: '', is_active: true });
 
-  const [showAssetModal, setShowAssetModal] = useState(false);
-  const [assetForm, setAssetForm] = useState({ id: null, name: '', asset_type: 'url', value: '', description: '', is_active: true, project_id: '' });
-
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('projects'); // 'projects', 'organizations', 'assets'
+  const [activeTab, setActiveTab] = useState('projects'); // 'projects' or 'organizations'
 
   const loadData = async () => {
     setLoading(true);
     setError('');
     try {
-      const [projectsData, organizationsData, assetsData] = await Promise.all([
+      const [projectsData, organizationsData] = await Promise.all([
         api.getProjects(),
-        api.getOrganizations(),
-        api.getAssets()
+        api.getOrganizations()
       ]);
       setProjects(projectsData);
       setOrganizations(organizationsData);
-      setAssets(assetsData);
     } catch (err) {
       setError('Erro ao carregar dados do backend.');
     } finally {
@@ -59,7 +53,8 @@ export default function Projects({ user }) {
         name: projectForm.name,
         description: projectForm.description || null,
         tags: tagsArray,
-        organization_id: projectForm.organization_id ? Number(projectForm.organization_id) : null
+        organization_id: projectForm.organization_id ? Number(projectForm.organization_id) : null,
+        url: projectForm.url || null
       };
 
       if (projectForm.id) {
@@ -80,13 +75,14 @@ export default function Projects({ user }) {
       name: project.name,
       description: project.description || '',
       tags: project.tags ? project.tags.join(', ') : '',
-      organization_id: project.organization_id || ''
+      organization_id: project.organization_id || '',
+      url: project.url || ''
     });
     setShowProjectModal(true);
   };
 
   const handleDeleteProject = async (id) => {
-    if (!window.confirm('Tem certeza de que deseja deletar este projeto? Todos os ativos associados serão afetados.')) return;
+    if (!window.confirm('Tem certeza de que deseja deletar este projeto? Todos os dados associados serão perdidos.')) return;
     try {
       await api.deleteProject(id);
       loadData();
@@ -131,61 +127,12 @@ export default function Projects({ user }) {
   };
 
   const handleDeleteOrganization = async (id) => {
-    if (!window.confirm('Tem certeza de que deseja deletar esta organização? Isso pode impactar projetos e ativos vinculados.')) return;
+    if (!window.confirm('Tem certeza de que deseja deletar esta organização? Isso pode impactar projetos vinculados.')) return;
     try {
       await api.deleteOrganization(id);
       loadData();
     } catch (err) {
       alert(err.message || 'Erro ao deletar organização.');
-    }
-  };
-
-  // Assets Handlers
-  const handleAssetSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    try {
-      const payload = {
-        name: assetForm.name,
-        asset_type: assetForm.asset_type,
-        value: assetForm.value,
-        description: assetForm.description || null,
-        is_active: assetForm.is_active,
-        project_id: assetForm.project_id ? Number(assetForm.project_id) : null
-      };
-
-      if (assetForm.id) {
-        await api.updateAsset(assetForm.id, payload);
-      } else {
-        await api.createAsset(payload);
-      }
-      setShowAssetModal(false);
-      loadData();
-    } catch (err) {
-      setError(err.message || 'Erro ao salvar ativo técnico.');
-    }
-  };
-
-  const handleEditAsset = (asset) => {
-    setAssetForm({
-      id: asset.id,
-      name: asset.name,
-      asset_type: asset.asset_type,
-      value: asset.value,
-      description: asset.description || '',
-      is_active: asset.is_active,
-      project_id: asset.project_id || ''
-    });
-    setShowAssetModal(true);
-  };
-
-  const handleDeleteAsset = async (id) => {
-    if (!window.confirm('Tem certeza de que deseja remover este ativo do escopo?')) return;
-    try {
-      await api.deleteAsset(id);
-      loadData();
-    } catch (err) {
-      alert(err.message || 'Erro ao remover ativo.');
     }
   };
 
@@ -203,7 +150,7 @@ export default function Projects({ user }) {
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Gestão de Escopo</h1>
           <p style={{ color: 'var(--text-secondary)' }}>
-            Gerencie organizações, projetos e alvos/ativos cadastrados na sua superfície de ataque.
+            Gerencie organizações e projetos cadastrados na sua superfície de ataque.
           </p>
         </div>
         
@@ -211,16 +158,10 @@ export default function Projects({ user }) {
         {isAdmin && (
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button className="primary" onClick={() => {
-              setProjectForm({ id: null, name: '', description: '', tags: '', organization_id: '' });
+              setProjectForm({ id: null, name: '', description: '', tags: '', organization_id: '', url: '' });
               setShowProjectModal(true);
             }}>
               <Plus size={18} /> Novo Projeto
-            </button>
-            <button className="secondary" style={{ color: 'var(--color-primary)' }} onClick={() => {
-              setAssetForm({ id: null, name: '', asset_type: 'url', value: '', description: '', is_active: true, project_id: '' });
-              setShowAssetModal(true);
-            }}>
-              <Plus size={18} /> Adicionar Ativo (URL)
             </button>
             <button className="secondary" onClick={() => {
               setOrganizationForm({ id: null, name: '', domain: '', description: '', is_active: true });
@@ -257,13 +198,6 @@ export default function Projects({ user }) {
         </button>
         <button
           className="nav-item"
-          style={{ borderBottom: activeTab === 'assets' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
-          onClick={() => setActiveTab('assets')}
-        >
-          <ShieldAlert size={18} /> Ativos Técnicos ({assets.length})
-        </button>
-        <button
-          className="nav-item"
           style={{ borderBottom: activeTab === 'organizations' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('organizations')}
         >
@@ -284,6 +218,7 @@ export default function Projects({ user }) {
                 <thead>
                   <tr>
                     <th>Nome</th>
+                    <th>Endereço de Destino (URL)</th>
                     <th>Descrição</th>
                     <th>Organização</th>
                     <th>Tags</th>
@@ -296,7 +231,16 @@ export default function Projects({ user }) {
                     return (
                       <tr key={project.id}>
                         <td style={{ fontWeight: 600 }}>{project.name}</td>
-                        <td style={{ color: 'var(--text-secondary)', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                          {project.url ? (
+                            <a href={project.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary)' }}>
+                              {project.url}
+                            </a>
+                          ) : (
+                            <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Nenhum</span>
+                          )}
+                        </td>
+                        <td style={{ color: 'var(--text-secondary)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {project.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem descrição</span>}
                         </td>
                         <td>
@@ -324,64 +268,6 @@ export default function Projects({ user }) {
                             </button>
                             {isAdmin && (
                               <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteProject(project.id)}>
-                                <Trash2 size={14} />
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      ) : activeTab === 'assets' ? (
-        /* ASSETS LIST */
-        <div className="glass-card" style={{ overflow: 'hidden' }}>
-          {assets.length === 0 ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhum ativo cadastrado. Adicione ativos de rede ou URLs para escanear.
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Nome</th>
-                    <th>Tipo</th>
-                    <th>Valor (URL/Endereço)</th>
-                    <th>Projeto Vinculado</th>
-                    <th>Status</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assets.map(asset => {
-                    const proj = projects.find(p => p.id === asset.project_id);
-                    return (
-                      <tr key={asset.id}>
-                        <td style={{ fontWeight: 600 }}>{asset.name}</td>
-                        <td>
-                          <span className="badge info" style={{ textTransform: 'uppercase' }}>
-                            {asset.asset_type}
-                          </span>
-                        </td>
-                        <td style={{ fontFamily: 'monospace', fontSize: '0.85rem' }}>{asset.value}</td>
-                        <td>{proj ? proj.name : <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Nenhum</span>}</td>
-                        <td>
-                          <span className={`badge ${asset.is_active ? 'success' : 'medium'}`}>
-                            {asset.is_active ? 'Ativo' : 'Inativo'}
-                          </span>
-                        </td>
-                        <td>
-                          <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button className="secondary" style={{ padding: '0.4rem' }} onClick={() => handleEditAsset(asset)}>
-                              <Edit2 size={14} />
-                            </button>
-                            {isAdmin && (
-                              <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteAsset(asset.id)}>
                                 <Trash2 size={14} />
                               </button>
                             )}
@@ -481,6 +367,17 @@ export default function Projects({ user }) {
               </div>
 
               <div className="form-group">
+                <label>Endereço de Destino (URL)</label>
+                <input
+                  type="text"
+                  placeholder="Ex: https://meusite.com"
+                  value={projectForm.url}
+                  onChange={(e) => setProjectForm({ ...projectForm, url: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
                 <label>Organização Vinculada</label>
                 <select
                   value={projectForm.organization_id}
@@ -515,107 +412,6 @@ export default function Projects({ user }) {
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
                 <button type="button" className="secondary" onClick={() => setShowProjectModal(false)}>Cancelar</button>
-                <button type="submit" className="primary">Salvar</button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
-      )}
-
-      {/* ASSETS MODAL */}
-      {showAssetModal && createPortal(
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
-        }}>
-          <div className="glass-card animate-fade-in" style={{
-            width: '100%', maxWidth: '500px', padding: '2rem', border: '1px solid rgba(255, 255, 255, 0.1)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                {assetForm.id ? 'Editar Ativo de Escopo' : 'Adicionar Novo Ativo (URL)'}
-              </h2>
-              <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setShowAssetModal(false)}>
-                <X size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleAssetSubmit}>
-              <div className="form-group">
-                <label>Nome descritivo</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Site de Produção"
-                  value={assetForm.name}
-                  onChange={(e) => setAssetForm({ ...assetForm, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Tipo de Ativo</label>
-                <select
-                  value={assetForm.asset_type}
-                  onChange={(e) => setAssetForm({ ...assetForm, asset_type: e.target.value })}
-                  required
-                >
-                  <option value="url">URL (Endereço Web)</option>
-                  <option value="domain">Domínio (FQDN)</option>
-                  <option value="ip">Endereço IP</option>
-                  <option value="web_application">Aplicação Web</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Endereço de Destino (Valor)</label>
-                <input
-                  type="text"
-                  placeholder="Ex: https://meusite.com"
-                  value={assetForm.value}
-                  onChange={(e) => setAssetForm({ ...assetForm, value: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Projeto Vinculado</label>
-                <select
-                  value={assetForm.project_id}
-                  onChange={(e) => setAssetForm({ ...assetForm, project_id: e.target.value })}
-                  required
-                >
-                  <option value="">-- Selecione o Projeto --</option>
-                  {projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Descrição</label>
-                <textarea
-                  rows="2"
-                  placeholder="Finalidade deste alvo de escopo..."
-                  value={assetForm.description}
-                  onChange={(e) => setAssetForm({ ...assetForm, description: e.target.value })}
-                ></textarea>
-              </div>
-
-              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '1rem' }}>
-                <input
-                  id="asset_is_active"
-                  type="checkbox"
-                  checked={assetForm.is_active}
-                  onChange={(e) => setAssetForm({ ...assetForm, is_active: e.target.checked })}
-                  style={{ width: 'auto', display: 'inline' }}
-                />
-                <label htmlFor="asset_is_active" style={{ display: 'inline', margin: 0, textTransform: 'none' }}>Ativo e em Escopo de Varredura</label>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
-                <button type="button" className="secondary" onClick={() => setShowAssetModal(false)}>Cancelar</button>
                 <button type="submit" className="primary">Salvar</button>
               </div>
             </form>
