@@ -411,4 +411,20 @@ class CorrelationService:
         self.db.add(rec)
         self.db.flush()
 
+        # Trigger webhook if it is a high or critical severity vulnerability
+        if vuln.severity in ("critical", "high"):
+            try:
+                from app.services.webhook_service import WebhookService
+                WebhookService(self.db).dispatch_event("critical_vuln_found", {
+                    "vulnerability_id": vuln.id,
+                    "title": vuln.title,
+                    "severity": vuln.severity,
+                    "risk_score": vuln.risk_score,
+                    "cve_id": vuln.cve_id,
+                    "asset_id": vuln.asset_id
+                })
+            except Exception:
+                pass
+
         return vuln
+

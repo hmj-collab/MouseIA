@@ -301,7 +301,21 @@ class ScanService:
         scan.finished_at = datetime.datetime.now(datetime.timezone.utc)
         self.db.commit()
         self.db.refresh(scan)
+
+        # Trigger webhook event
+        try:
+            from app.services.webhook_service import WebhookService
+            WebhookService(self.db).dispatch_event("scan_completed", {
+                "scan_id": scan.id,
+                "scan_type": scan.scan_type,
+                "project_id": scan.project_id,
+                "status": scan.status
+            })
+        except Exception:
+            pass
+
         return self._to_out(scan)
+
 
     def _to_out(self, scan: ScanModel) -> ScanOut:
         return ScanOut.model_validate(scan)
