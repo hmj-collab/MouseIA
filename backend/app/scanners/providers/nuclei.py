@@ -13,7 +13,13 @@ class NucleiProvider(BaseProvider):
     def name(self) -> str:
         return "nuclei"
 
+    def _local_path(self) -> str:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.abspath(os.path.join(current_dir, "..", "modules", "nuclei", "nuclei"))
+
     def is_available(self) -> bool:
+        if os.path.exists(self._local_path()):
+            return True
         return shutil.which("nuclei") is not None
 
     def scan(self, target_url: str) -> List[Dict[str, Any]]:
@@ -25,8 +31,17 @@ class NucleiProvider(BaseProvider):
         os.close(fd)
 
         try:
-            cmd = ["nuclei", "-target", target_url, "-json-export", temp_path, "-silent"]
+            local_exe = self._local_path()
+            if os.path.exists(local_exe):
+                try:
+                    os.chmod(local_exe, 0o755)
+                except Exception:
+                    pass
+                cmd = [local_exe, "-target", target_url, "-json-export", temp_path, "-silent"]
+            else:
+                cmd = ["nuclei", "-target", target_url, "-json-export", temp_path, "-silent"]
             subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+
 
             if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:
                 with open(temp_path, "r", encoding="utf-8") as f:

@@ -13,13 +13,29 @@ class TestSSLProvider(BaseProvider):
     def name(self) -> str:
         return "testssl"
 
+    def _local_path(self) -> str:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.abspath(os.path.join(current_dir, "..", "modules", "testssl", "testssl.sh"))
+
     def is_available(self) -> bool:
+        if os.path.exists(self._local_path()) and shutil.which("bash") is not None:
+            return True
         return shutil.which("testssl.sh") is not None or shutil.which("testssl") is not None
 
     def scan(self, target_url: str) -> List[Dict[str, Any]]:
         signals = []
         
-        executable = shutil.which("testssl.sh") or shutil.which("testssl")
+        local_exe = self._local_path()
+        executable = None
+        if os.path.exists(local_exe) and shutil.which("bash") is not None:
+            try:
+                os.chmod(local_exe, 0o755)
+            except Exception:
+                pass
+            executable = local_exe
+        else:
+            executable = shutil.which("testssl.sh") or shutil.which("testssl")
+            
         if not executable:
             return signals
 
@@ -28,6 +44,7 @@ class TestSSLProvider(BaseProvider):
 
         try:
             cmd = [executable, "--jsonfile", temp_path, target_url]
+
             subprocess.run(cmd, capture_output=True, text=True, timeout=180)
 
             if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:

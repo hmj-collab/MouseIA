@@ -13,7 +13,13 @@ class NiktoProvider(BaseProvider):
     def name(self) -> str:
         return "nikto"
 
+    def _local_path(self) -> str:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.abspath(os.path.join(current_dir, "..", "modules", "nikto", "program", "nikto.pl"))
+
     def is_available(self) -> bool:
+        if os.path.exists(self._local_path()) and shutil.which("perl") is not None:
+            return True
         return shutil.which("nikto") is not None
 
     def scan(self, target_url: str) -> List[Dict[str, Any]]:
@@ -25,8 +31,17 @@ class NiktoProvider(BaseProvider):
         os.close(fd)
 
         try:
-            cmd = ["nikto", "-h", target_url, "-Format", "json", "-o", temp_path]
+            local_exe = self._local_path()
+            if os.path.exists(local_exe) and shutil.which("perl") is not None:
+                try:
+                    os.chmod(local_exe, 0o755)
+                except Exception:
+                    pass
+                cmd = ["perl", local_exe, "-h", target_url, "-Format", "json", "-o", temp_path]
+            else:
+                cmd = ["nikto", "-h", target_url, "-Format", "json", "-o", temp_path]
             subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+
 
             if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:
                 with open(temp_path, "r", encoding="utf-8") as f:

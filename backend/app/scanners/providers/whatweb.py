@@ -11,7 +11,15 @@ class WhatWebProvider(BaseProvider):
     def name(self) -> str:
         return "whatweb"
 
+    def _local_path(self) -> str:
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.abspath(os.path.join(current_dir, "..", "modules", "whatweb", "whatweb"))
+
     def is_available(self) -> bool:
+        import os
+        if os.path.exists(self._local_path()) and shutil.which("ruby") is not None:
+            return True
         return shutil.which("whatweb") is not None
 
     def scan(self, target_url: str) -> List[Dict[str, Any]]:
@@ -20,10 +28,21 @@ class WhatWebProvider(BaseProvider):
             return signals
 
         try:
-            cmd = ["whatweb", target_url, "--logging=json=-"]
+            import os
+            local_exe = self._local_path()
+            if os.path.exists(local_exe) and shutil.which("ruby") is not None:
+                try:
+                    os.chmod(local_exe, 0o755)
+                except Exception:
+                    pass
+                cmd = ["ruby", local_exe, target_url, "--logging=json=-"]
+            else:
+                cmd = ["whatweb", target_url, "--logging=json=-"]
+            
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             if result.returncode != 0 or not result.stdout:
                 return signals
+
 
             data = json.loads(result.stdout)
             for item in data:

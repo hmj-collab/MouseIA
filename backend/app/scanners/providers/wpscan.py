@@ -11,7 +11,15 @@ class WPScanProvider(BaseProvider):
     def name(self) -> str:
         return "wpscan"
 
+    def _local_path(self) -> str:
+        import os
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.abspath(os.path.join(current_dir, "..", "modules", "wpscan", "bin", "wpscan"))
+
     def is_available(self) -> bool:
+        import os
+        if os.path.exists(self._local_path()) and shutil.which("ruby") is not None:
+            return True
         return shutil.which("wpscan") is not None
 
     def scan(self, target_url: str) -> List[Dict[str, Any]]:
@@ -20,14 +28,34 @@ class WPScanProvider(BaseProvider):
             return signals
 
         try:
-            # Execute wpscan with user (u), popular plugins (p) and popular themes (t) enumeration flags
-            cmd = [
-                "wpscan", 
-                "--url", target_url, 
-                "--format", "json", 
-                "--disable-tls-checks",
-                "--enumerate", "u,p,t"
-            ]
+            import os
+            local_exe = self._local_path()
+            if os.path.exists(local_exe) and shutil.which("ruby") is not None:
+                # Make sure the wrapper is executable
+                try:
+                    os.chmod(local_exe, 0o755)
+                except Exception:
+                    pass
+                
+                # Execute using ruby explicitly to resolve local gem/execution issues
+                cmd = [
+                    "ruby",
+                    local_exe,
+                    "--url", target_url,
+                    "--format", "json",
+                    "--disable-tls-checks",
+                    "--enumerate", "u,p,t"
+                ]
+            else:
+                # Execute wpscan with user (u), popular plugins (p) and popular themes (t) enumeration flags
+                cmd = [
+                    "wpscan", 
+                    "--url", target_url, 
+                    "--format", "json", 
+                    "--disable-tls-checks",
+                    "--enumerate", "u,p,t"
+                ]
+
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             if result.returncode not in (0, 5):  # 5 is returned by wpscan when vulnerabilities are found
                 return signals
