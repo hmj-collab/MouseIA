@@ -18,9 +18,11 @@ class WPScanProvider(BaseProvider):
 
     def is_available(self) -> bool:
         import os
+        if shutil.which("wpscan") is not None:
+            return True
         if os.path.exists(self._local_path()) and shutil.which("ruby") is not None:
             return True
-        return shutil.which("wpscan") is not None
+        return False
 
     def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
@@ -30,14 +32,24 @@ class WPScanProvider(BaseProvider):
         try:
             import os
             local_exe = self._local_path()
-            if os.path.exists(local_exe) and shutil.which("ruby") is not None:
+            global_exe = shutil.which("wpscan")
+            
+            if global_exe:
+                # Execute global brew-installed wpscan (uses self-contained Ruby 3.4)
+                cmd = [
+                    global_exe, 
+                    "--url", target_url, 
+                    "--format", "json", 
+                    "--disable-tls-checks",
+                    "--enumerate", "u,p,t"
+                ]
+            elif os.path.exists(local_exe) and shutil.which("ruby") is not None:
                 # Make sure the wrapper is executable
                 try:
                     os.chmod(local_exe, 0o755)
                 except Exception:
                     pass
                 
-                # Execute using ruby explicitly to resolve local gem/execution issues
                 cmd = [
                     "ruby",
                     local_exe,
@@ -47,16 +59,10 @@ class WPScanProvider(BaseProvider):
                     "--enumerate", "u,p,t"
                 ]
             else:
-                # Execute wpscan with user (u), popular plugins (p) and popular themes (t) enumeration flags
-                cmd = [
-                    "wpscan", 
-                    "--url", target_url, 
-                    "--format", "json", 
-                    "--disable-tls-checks",
-                    "--enumerate", "u,p,t"
-                ]
+                return signals
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+
             if result.returncode not in (0, 5):  # 5 is returned by wpscan when vulnerabilities are found
                 log_callback("ERROR", f"Falha na execução do WPScan (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
                 return signals
