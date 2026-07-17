@@ -263,6 +263,13 @@ class ApiService {
     });
   }
 
+  async getAiAnalysis(id) {
+    return this.request(`/vulnerabilities/${id}/ai-analysis`, {
+      method: 'POST',
+    });
+  }
+
+
   // Recommendations Endpoints
   async getRecommendations(vulnerabilityId = null) {
     const query = vulnerabilityId ? `?vulnerability_id=${vulnerabilityId}` : '';

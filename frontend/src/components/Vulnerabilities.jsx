@@ -24,6 +24,9 @@ export default function Vulnerabilities({ user }) {
   const [selectedVuln, setSelectedVuln] = useState(null);
   const [linkedRecs, setLinkedRecs] = useState([]);
   const [updatingStatus, setUpdatingStatus] = useState(null); // Track ID being updated
+  const [aiAnalysisResult, setAiAnalysisResult] = useState(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+
 
   const loadData = async () => {
     setLoading(true);
@@ -70,10 +73,24 @@ export default function Vulnerabilities({ user }) {
 
   const handleVulnClick = async (vuln) => {
     setSelectedVuln(vuln);
+    setAiAnalysisResult(null);
     // Find recommendations linked to this vulnerability ID
     const recs = recommendations.filter(r => r.vulnerability_id === vuln.id);
     setLinkedRecs(recs);
   };
+
+  const handleTriggerAiAnalysis = async () => {
+    setLoadingAi(true);
+    try {
+      const data = await api.getAiAnalysis(selectedVuln.id);
+      setAiAnalysisResult(data);
+    } catch (err) {
+      alert("Erro ao executar análise de IA: " + (err.message || err));
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
 
   const handleUpdateVulnStatus = async (vulnId, newStatus) => {
     setUpdatingStatus(vulnId);
@@ -212,10 +229,12 @@ export default function Vulnerabilities({ user }) {
                     <th>Título</th>
                     <th>Alvo (Ativo)</th>
                     <th>Score CVSS</th>
+                    <th>Risk Score (IA)</th>
                     <th>Severidade</th>
                     <th>Status</th>
                     <th>Ações</th>
                   </tr>
+
                 </thead>
                 <tbody>
                   {filteredVulns.map(vuln => (
@@ -252,10 +271,27 @@ export default function Vulnerabilities({ user }) {
                         )}
                       </td>
                       <td>
+                        {vuln.risk_score ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 700, color: getCvssColor(vuln.risk_score) }}>{vuln.risk_score.toFixed(2)}</span>
+                            <div style={{ width: '60px', height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ 
+                                width: `${vuln.risk_score * 10}%`, 
+                                height: '100%', 
+                                background: getCvssColor(vuln.risk_score) 
+                              }}></div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)' }}>-</span>
+                        )}
+                      </td>
+                      <td>
                         <span className={`badge ${(vuln.severity || 'info').toLowerCase()}`}>
                           {vuln.severity}
                         </span>
                       </td>
+
                       <td>
                         <span className={`badge ${
                           vuln.status === 'resolved' || vuln.status === 'mitigated' ? 'success' : 
@@ -394,8 +430,16 @@ export default function Vulnerabilities({ user }) {
                 </div>
               )}
 
+              {selectedVuln.risk_score && (
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.25rem' }}>Risk Score (Dinâmico)</div>
+                  <span style={{ fontWeight: 700, color: getCvssColor(selectedVuln.risk_score) }}>{selectedVuln.risk_score.toFixed(2)} / 10.0</span>
+                </div>
+              )}
+
               <div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.25rem' }}>Status da Ameaça</div>
+
                 <span className={`badge ${
                   selectedVuln.status === 'resolved' || selectedVuln.status === 'mitigated' ? 'success' : 
                   selectedVuln.status === 'accepted' ? 'info' : 'high'
@@ -451,8 +495,83 @@ export default function Vulnerabilities({ user }) {
               </div>
             )}
 
+            {/* AI Analysis Section */}
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ShieldAlert size={18} style={{ color: 'var(--color-primary)' }} /> Inteligência Artificial - Mouse AI Engine
+                </h3>
+                {!aiAnalysisResult && !loadingAi && (
+                  <button className="primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }} onClick={handleTriggerAiAnalysis}>
+                    Analisar com IA
+                  </button>
+                )}
+              </div>
+
+              {loadingAi && (
+                <div style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                  <div className="animate-pulse" style={{ fontSize: '0.85rem' }}>O Mouse IA está analisando a ameaça com o Gemini...</div>
+                </div>
+              )}
+
+              {aiAnalysisResult && (
+                <div className="glass-card animate-fade-in" style={{ padding: '1.25rem', background: 'rgba(99, 102, 241, 0.03)', border: '1px solid rgba(99, 102, 241, 0.2)', borderRadius: '8px' }}>
+                  
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Explicação Executiva (IA)</div>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                      {aiAnalysisResult.explanation}
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Impacto para o Negócio</div>
+                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', margin: 0 }}>
+                      {aiAnalysisResult.business_impact}
+                    </p>
+                  </div>
+
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 600, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Guia de Hardening e Correção</div>
+                    <pre style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      padding: '0.85rem',
+                      borderRadius: '6px',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-secondary)',
+                      whiteSpace: 'pre-wrap',
+                      fontFamily: 'inherit',
+                      lineHeight: '1.4',
+                      margin: 0
+                    }}>{aiAnalysisResult.remediation_steps}</pre>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem', marginTop: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.25rem' }}>Confiança de Detecção</div>
+                      <span style={{ fontWeight: 700, color: 'var(--color-success)' }}>{aiAnalysisResult.confidence_score}%</span>
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.25rem' }}>Falso Positivo?</div>
+                      <span style={{ fontWeight: 700, color: aiAnalysisResult.is_false_positive ? 'var(--color-danger)' : 'var(--text-secondary)' }}>
+                        {aiAnalysisResult.is_false_positive ? "Sim (Provável)" : "Não"}
+                      </span>
+                      {aiAnalysisResult.false_positive_reason && (
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0' }}>
+                          {aiAnalysisResult.false_positive_reason}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+            </div>
+
             {/* Recommendations Sub-section */}
             <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }}>
+
               <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <ShieldCheck size={18} style={{ color: 'var(--color-success)' }} /> Recomendações de Mitigação Vinculadas
               </h3>
