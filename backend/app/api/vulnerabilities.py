@@ -62,3 +62,17 @@ def delete_vulnerability(
     deleted = VulnerabilityService(db).delete_vulnerability(vulnerability_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vulnerabilidade não encontrada")
+
+
+@router.post("/{vulnerability_id}/ai-analysis")
+def analyze_vulnerability_ai(
+    vulnerability_id: int,
+    db: Session = Depends(get_db),
+    user: dict[str, str] = Depends(require_role("admin", "viewer"))
+) -> dict:
+    from app.services.ai_service import AIService
+    vuln = VulnerabilityService(db).get_vulnerability(vulnerability_id)
+    if vuln is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vulnerabilidade não encontrada")
+    return AIService(db).analyze_vulnerability(vulnerability_id)
+
