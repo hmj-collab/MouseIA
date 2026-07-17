@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
   ShieldAlert, ShieldCheck, CheckCircle2, AlertOctagon, AlertTriangle, 
-  Trash2, RefreshCw, X, ShieldAlert as VulnerabilityIcon, FileText, Check
+  Trash2, RefreshCw, X, ShieldAlert as VulnerabilityIcon, FileText, Check,
+  Download, Printer
 } from 'lucide-react';
 import api from '../services/api';
+
 
 export default function Vulnerabilities({ user }) {
   const isAdmin = user && user.role === 'admin';
@@ -156,10 +158,25 @@ export default function Vulnerabilities({ user }) {
             Consulte as vulnerabilidades técnicas correlacionadas e execute planos de recomendação.
           </p>
         </div>
-        <button className="secondary" onClick={loadData}>
-          <RefreshCw size={14} /> Atualizar
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button className="secondary" onClick={async () => {
+            try {
+              await api.downloadVulnerabilitiesCSV();
+            } catch (err) {
+              alert('Erro ao exportar CSV.');
+            }
+          }} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Download size={14} /> Exportar CSV
+          </button>
+          <button className="secondary" onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Printer size={14} /> Imprimir PDF
+          </button>
+          <button className="primary" onClick={loadData} style={{ padding: '0.5rem 0.75rem' }}>
+            <RefreshCw size={14} />
+          </button>
+        </div>
       </div>
+
 
       {/* Filter Toolbar */}
       <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Activity, Globe, Database, Play, CheckCircle, 
-  AlertCircle, AlertOctagon, HelpCircle, Server
+  AlertCircle, AlertOctagon, Server, Clock, Download
 } from 'lucide-react';
 import api from '../services/api';
 
@@ -15,18 +15,22 @@ export default function Dashboard({ user, onNavigate }) {
     findings: 0,
     findingsBySeverity: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
     recentScans: [],
-    recentFindings: []
+    recentFindings: [],
+    avgRiskScore: 0.0,
+    avgMttrHours: 0.0,
+    slaCompliancePct: 100.0
   });
 
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [projects, assets, scans, signals, findings] = await Promise.all([
+      const [projects, assets, scans, signals, findings, metrics] = await Promise.all([
         api.getProjects(),
         api.getAssets(),
         api.getScans(),
         api.getSignals(),
-        api.getFindings()
+        api.getFindings(),
+        api.getDashboardMetrics()
       ]);
 
       // Calculate severity counts
@@ -48,7 +52,10 @@ export default function Dashboard({ user, onNavigate }) {
         findings: findings.length,
         findingsBySeverity: counts,
         recentScans: scans.slice(0, 5),
-        recentFindings: findings.slice(0, 5)
+        recentFindings: findings.slice(0, 5),
+        avgRiskScore: metrics.avg_risk_score,
+        avgMttrHours: metrics.avg_mttr_hours,
+        slaCompliancePct: metrics.sla_compliance_pct
       });
     } catch (error) {
       console.error("Erro ao carregar dados do Dashboard", error);
@@ -60,6 +67,14 @@ export default function Dashboard({ user, onNavigate }) {
   useEffect(() => {
     loadDashboardData();
   }, []);
+
+  const handleExportCSV = async () => {
+    try {
+      await api.downloadVulnerabilitiesCSV();
+    } catch (error) {
+      alert('Erro ao exportar relatório CSV.');
+    }
+  };
 
   if (loading) {
     return (
@@ -79,11 +94,17 @@ export default function Dashboard({ user, onNavigate }) {
 
   return (
     <div className="animate-fade-in" style={{ padding: '2rem 0' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Dashboard Geral</h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          Visão consolidada da superfície de ataque e ameaças detectadas.
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
+        <div>
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Dashboard Geral</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>
+            Visão consolidada da superfície de ataque e ameaças detectadas.
+          </p>
+        </div>
+        
+        <button className="secondary" onClick={handleExportCSV} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Download size={16} /> Exportar CSV (Geral)
+        </button>
       </div>
 
       {/* Main Stats Cards Grid */}
@@ -125,6 +146,42 @@ export default function Dashboard({ user, onNavigate }) {
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Total de Achados</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>{stats.findings}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* SLA & Governance Section */}
+      <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Governança e Nível de Serviço</h3>
+      <div className="grid-cols-3" style={{ marginBottom: '2.5rem' }}>
+        <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ background: 'rgba(245, 158, 11, 0.1)', color: 'var(--color-warning)', padding: '0.75rem', borderRadius: '10px' }}>
+            <Activity size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Risk Score Médio</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>{stats.avgRiskScore || '0.0'}</div>
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ background: 'rgba(139, 92, 246, 0.1)', color: 'var(--color-secondary)', padding: '0.75rem', borderRadius: '10px' }}>
+            <Clock size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>MTTR (Tempo de Resposta)</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>
+              {stats.avgMttrHours > 0 ? `${stats.avgMttrHours}h` : 'Sem dados'}
+            </div>
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: 'var(--color-success)', padding: '0.75rem', borderRadius: '10px' }}>
+            <CheckCircle size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Conformidade com SLA</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>{stats.slaCompliancePct}%</div>
           </div>
         </div>
       </div>

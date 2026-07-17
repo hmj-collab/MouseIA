@@ -292,7 +292,37 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  async getDashboardMetrics() {
+    return this.request('/dashboard/metrics');
+  }
+
+  async downloadVulnerabilitiesCSV(assetId = null) {
+    const token = this.getToken();
+    const query = assetId ? `?asset_id=${assetId}` : '';
+    const url = `${API_BASE_URL}/vulnerabilities/export/csv${query}`;
+    
+    const response = await fetch(url, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` })
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erro ao baixar relatório CSV.');
+    }
+    
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = 'vulnerabilities.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
 }
+
 
 export const api = new ApiService();
 export default api;
