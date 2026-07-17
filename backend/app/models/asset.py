@@ -14,8 +14,8 @@ class Asset(Base, TimestampMixin):
     value = Column(String(500), nullable=False)
     description = Column(Text, nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
-    site_id = Column(Integer, ForeignKey("sites.id"), nullable=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True, index=True)
 
-    company = relationship("Company", backref="assets")
-    site = relationship("Site", backref="assets")
+    organization = relationship("Organization", backref="assets")
+    project = relationship("Project", backref="assets")

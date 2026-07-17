@@ -15,7 +15,7 @@ class SignalRepository:
         source: Optional[str] = None,
         signal_type: Optional[str] = None,
         severity: Optional[str] = None,
-        site_id: Optional[int] = None,
+        asset_id: Optional[int] = None,
         min_confidence: Optional[int] = None,
         max_confidence: Optional[int] = None,
     ) -> list[Signal]:
@@ -27,8 +27,8 @@ class SignalRepository:
             query = query.filter(Signal.signal_type == signal_type)
         if severity is not None:
             query = query.filter(Signal.severity == severity)
-        if site_id is not None:
-            query = query.filter(Signal.site_id == site_id)
+        if asset_id is not None:
+            query = query.filter(Signal.asset_id == asset_id)
         if min_confidence is not None:
             query = query.filter(Signal.confidence >= min_confidence)
         if max_confidence is not None:
@@ -43,7 +43,8 @@ class SignalRepository:
             severity=payload.severity,
             confidence=payload.confidence,
             description=payload.description,
-            site_id=payload.site_id,
+            asset_id=payload.asset_id,
+            finding_id=payload.finding_id,
         )
         self.db.add(signal)
         self.db.commit()
@@ -68,8 +69,11 @@ class SignalRepository:
             signal.confidence = payload.confidence
         if payload.description is not None:
             signal.description = payload.description
-        if payload.site_id is not None:
-            signal.site_id = payload.site_id
+        if payload.asset_id is not None:
+            signal.asset_id = payload.asset_id
+        if payload.finding_id is not None:
+            signal.finding_id = payload.finding_id
+
 
         self.db.commit()
         self.db.refresh(signal)

@@ -12,12 +12,12 @@ router = APIRouter(prefix="/scans", tags=["scans"])
 
 @router.get("", response_model=list[ScanOut])
 def list_scans(
-    site_id: Optional[int] = None,
+    project_id: Optional[int] = None,
     asset_id: Optional[int] = None,
     db: Session = Depends(get_db),
     user: dict[str, str] = Depends(require_role("admin", "viewer")),
 ) -> list[ScanOut]:
-    return ScanService(db).list_scans(site_id=site_id, asset_id=asset_id)
+    return ScanService(db).list_scans(project_id=project_id, asset_id=asset_id)
 
 
 @router.post("", response_model=ScanOut, status_code=status.HTTP_201_CREATED)

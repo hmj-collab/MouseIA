@@ -15,18 +15,32 @@ def test_findings_crud_flow() -> None:
     token = login_response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
-    site_response = client.post(
-        "/sites",
+    project_response = client.post(
+        "/projects",
         json={
-            "name": "Finding Test Site",
-            "url": "https://finding-test.local",
-            "description": "Site para testes de findings",
+            "name": "Finding Test Project",
+            "description": "Projeto para testes de findings",
             "tags": ["test"],
         },
         headers=headers,
     )
-    assert site_response.status_code == 201
-    site_id = site_response.json()["id"]
+    assert project_response.status_code == 201
+    project_id = project_response.json()["id"]
+
+    asset_response = client.post(
+        "/assets",
+        json={
+            "name": "Finding Test Asset",
+            "asset_type": "url",
+            "value": "https://finding-test.local",
+            "description": "Ativo para testes de findings",
+            "is_active": True,
+            "project_id": project_id,
+        },
+        headers=headers,
+    )
+    assert asset_response.status_code == 201
+    asset_id = asset_response.json()["id"]
 
     signal_response = client.post(
         "/signals",
@@ -36,7 +50,7 @@ def test_findings_crud_flow() -> None:
             "severity": "medium",
             "confidence": 60,
             "description": "HTTP discrepancy detected",
-            "site_id": site_id,
+            "asset_id": asset_id,
         },
         headers=headers,
     )

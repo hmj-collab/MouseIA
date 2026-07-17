@@ -7,14 +7,14 @@ import {
 import api from './services/api';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import Sites from './components/Sites';
+import Projects from './components/Projects';
 import Scans from './components/Scans';
 import SignalsFindings from './components/SignalsFindings';
 import Vulnerabilities from './components/Vulnerabilities';
 
 function App() {
   const [user, setUser] = useState(null);
-  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard', 'sites', 'scans', 'signals', 'vulnerabilities'
+  const [currentTab, setCurrentTab] = useState('dashboard'); // 'dashboard', 'projects', 'scans', 'signals', 'vulnerabilities'
   const [checkingAuth, setCheckingAuth] = useState(true);
 
   // Check auth state on mount
@@ -79,8 +79,8 @@ function App() {
             <LayoutDashboard size={16} /> Dashboard
           </button>
           <button 
-            className={`nav-item ${currentTab === 'sites' ? 'active' : ''}`}
-            onClick={() => setCurrentTab('sites')}
+            className={`nav-item ${currentTab === 'projects' ? 'active' : ''}`}
+            onClick={() => setCurrentTab('projects')}
           >
             <Globe size={16} /> Escopo
           </button>
@@ -129,8 +129,8 @@ function App() {
         {currentTab === 'dashboard' && (
           <Dashboard user={user} onNavigate={setCurrentTab} />
         )}
-        {currentTab === 'sites' && (
-          <Sites user={user} />
+        {currentTab === 'projects' && (
+          <Projects user={user} />
         )}
         {currentTab === 'scans' && (
           <Scans user={user} />

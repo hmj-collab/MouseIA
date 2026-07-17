@@ -8,7 +8,8 @@ from app.models.signal import Signal as SignalModel
 from app.models.finding import Finding as FindingModel
 from app.repositories.scan_repository import ScanRepository
 from app.repositories.asset_repository import AssetRepository
-from app.repositories.site_repository import SiteRepository
+from app.repositories.project_repository import ProjectRepository
+from app.models.asset import Asset as AssetModel
 from app.schemas.scan import ScanCreate, ScanOut, ScanUpdate
 
 
@@ -19,8 +20,8 @@ class ScanService:
     def _repository(self) -> ScanRepository:
         return ScanRepository(self.db)
 
-    def list_scans(self, site_id: Optional[int] = None, asset_id: Optional[int] = None) -> list[ScanOut]:
-        scans = self._repository().list_scans(site_id=site_id, asset_id=asset_id)
+    def list_scans(self, project_id: Optional[int] = None, asset_id: Optional[int] = None) -> list[ScanOut]:
+        scans = self._repository().list_scans(project_id=project_id, asset_id=asset_id)
         return [self._to_out(scan) for scan in scans]
 
     def get_scan(self, scan_id: int) -> Optional[ScanOut]:
@@ -68,22 +69,33 @@ class ScanService:
         log("INFO", f"Iniciando varredura técnica do Alvo. Tipo de análise: {scan.scan_type.upper()}")
 
         target_url = None
-        site_id = scan.site_id
+        project_id = scan.project_id
+        asset_id = scan.asset_id
 
         # 2. Find target URL
-        if scan.site_id is not None:
-            site = SiteRepository(self.db).get_site(scan.site_id)
-            if site:
-                target_url = site.url
-                log("INFO", f"Identificado Site associado: {site.name} ({target_url})")
+        if scan.project_id is not None:
+            project = ProjectRepository(self.db).get_project(scan.project_id)
+            if project:
+                # Find web application asset associated with this project
+                assoc_asset = self.db.query(AssetModel).filter(
+                    AssetModel.project_id == scan.project_id,
+                    AssetModel.asset_type == "web_application"
+                ).first()
+                if assoc_asset:
+                    target_url = assoc_asset.value
+                    if not target_url.startswith(("http://", "https://")):
+                        target_url = f"http://{target_url}"
+                    asset_id = assoc_asset.id
+                log("INFO", f"Identificado Projeto associado: {project.name} ({target_url})")
         elif scan.asset_id is not None:
             asset = AssetRepository(self.db).get_by_id(scan.asset_id)
             if asset:
-                if asset.asset_type in ("url", "domain"):
+                if asset.asset_type in ("url", "domain", "web_application"):
                     target_url = asset.value
                     if not target_url.startswith(("http://", "https://")):
                         target_url = f"http://{target_url}"
-                site_id = asset.site_id
+                project_id = asset.project_id
+                asset_id = asset.id
                 log("INFO", f"Identificado Ativo Técnico associado: {asset.name} ({target_url})")
 
         signals_to_create = []
@@ -266,40 +278,21 @@ class ScanService:
         else:
             log("ERROR", "Nenhum alvo URL válido encontrado para o Scan. Concluindo sem varredura.")
 
-        log("INFO", f"Salvando resultados da varredura... Total de sinais criados: {len(signals_to_create)}")
+        log("INFO", f"Salvando resultados da varredura... Processando {len(signals_to_create)} sinais através do Correlation Engine...")
         
-        # 4. Save Signals and create Findings
-        for sig_data in signals_to_create:
-            sig = SignalModel(
-                source=f"scan-{scan.scan_type}",
-                signal_type=sig_data["type"],
-                severity=sig_data["severity"],
-                confidence=sig_data["confidence"],
-                description=sig_data["desc"],
-                site_id=site_id
+        try:
+            from app.services.correlation_service import CorrelationService
+            correlation_svc = CorrelationService(self.db)
+            findings = correlation_svc.process_new_signals(
+                signals_data=signals_to_create,
+                asset_id=asset_id,
+                source=f"scan-{scan.scan_type}"
             )
-            self.db.add(sig)
-            self.db.flush()  # to populate sig.id
+            for f in findings:
+                log("INFO", f"Enriquecimento de Ameaça: Achado '{f.title}' correlacionado com sucesso.")
+        except Exception as e:
+            log("ERROR", f"Falha ao processar sinais e correlacionar achados: {str(e)}")
 
-            # For each signal, create a finding
-            finding = FindingModel(
-                title=f"Detectado: {sig_data['type']}",
-                description=sig_data["desc"],
-                severity=sig_data["severity"],
-                status="open",
-                signal_id=sig.id
-            )
-            self.db.add(finding)
-            self.db.flush()  # populate finding.id
-
-            # Correlate finding into Vulnerability and Recommendation
-            try:
-                from app.services.correlation_service import CorrelationService
-                correlation_svc = CorrelationService(self.db)
-                correlation_svc.correlate_finding(finding, asset_id=scan.asset_id)
-                log("INFO", f"Enriquecimento de Ameaça: Achado '{finding.title}' correlacionado com sucesso.")
-            except Exception as e:
-                log("ERROR", f"Falha ao correlacionar achado '{finding.title}': {str(e)}")
 
         # 5. Finalize Scan and write formatted log string to description
         log("SUCCESS", "Varredura concluída com sucesso.")

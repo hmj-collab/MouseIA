@@ -1,6 +1,6 @@
-from app.models.company import Company
+from app.models.organization import Organization
 from app.models.user import User
-from app.models.site import Site
+from app.models.project import Project
 from app.models.signal import Signal
 from app.models.finding import Finding
 from app.models.asset import Asset
@@ -10,9 +10,9 @@ from app.models.recommendation import Recommendation
 from app.models.task import Task
 
 __all__ = [
-    "Company",
+    "Organization",
     "User",
-    "Site",
+    "Project",
     "Signal",
     "Finding",
     "Asset",

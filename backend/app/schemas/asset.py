@@ -13,8 +13,8 @@ class AssetCreate(BaseModel):
     value: str = Field(min_length=1, max_length=500)
     description: Optional[str] = None
     is_active: bool = True
-    company_id: Optional[int] = None
-    site_id: Optional[int] = None
+    organization_id: Optional[int] = None
+    project_id: Optional[int] = None
 
 
 class AssetUpdate(BaseModel):
@@ -23,8 +23,8 @@ class AssetUpdate(BaseModel):
     value: Optional[str] = Field(default=None, min_length=1, max_length=500)
     description: Optional[str] = None
     is_active: Optional[bool] = None
-    company_id: Optional[int] = None
-    site_id: Optional[int] = None
+    organization_id: Optional[int] = None
+    project_id: Optional[int] = None
 
 
 class AssetOut(BaseModel):
@@ -34,8 +34,8 @@ class AssetOut(BaseModel):
     value: str
     description: Optional[str] = None
     is_active: bool
-    company_id: Optional[int] = None
-    site_id: Optional[int] = None
+    organization_id: Optional[int] = None
+    project_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime
 

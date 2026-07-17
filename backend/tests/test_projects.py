@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-def test_sites_crud_flow() -> None:
+def test_projects_crud_flow() -> None:
     client = TestClient(app)
 
     login_response = client.post(
@@ -14,11 +14,10 @@ def test_sites_crud_flow() -> None:
     headers = {"Authorization": f"Bearer {token}"}
 
     create_response = client.post(
-        "/sites",
+        "/projects",
         json={
-            "name": "Example Site",
-            "url": "https://example.com",
-            "description": "Public demo site",
+            "name": "Example Project",
+            "description": "Public demo project",
             "tags": ["public", "demo"],
         },
         headers=headers,
@@ -26,27 +25,26 @@ def test_sites_crud_flow() -> None:
 
     assert create_response.status_code == 201
     created = create_response.json()
-    site_id = created["id"]
+    project_id = created["id"]
 
-    list_response = client.get("/sites", headers=headers)
+    list_response = client.get("/projects", headers=headers)
     assert list_response.status_code == 200
-    assert any(item["id"] == site_id for item in list_response.json())
+    assert any(item["id"] == project_id for item in list_response.json())
 
     update_response = client.put(
-        f"/sites/{site_id}",
+        f"/projects/{project_id}",
         json={
-            "name": "Updated Example Site",
-            "url": "https://example.com",
+            "name": "Updated Example Project",
             "description": "Updated description",
             "tags": ["public", "demo", "updated"],
         },
         headers=headers,
     )
     assert update_response.status_code == 200
-    assert update_response.json()["name"] == "Updated Example Site"
+    assert update_response.json()["name"] == "Updated Example Project"
 
-    delete_response = client.delete(f"/sites/{site_id}", headers=headers)
+    delete_response = client.delete(f"/projects/{project_id}", headers=headers)
     assert delete_response.status_code == 204
 
-    get_response = client.get(f"/sites/{site_id}", headers=headers)
+    get_response = client.get(f"/projects/{project_id}", headers=headers)
     assert get_response.status_code == 404

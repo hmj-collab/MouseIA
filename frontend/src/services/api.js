@@ -90,70 +90,70 @@ class ApiService {
     });
   }
 
-  // Companies Endpoints
-  async getCompanies() {
-    return this.request('/companies');
+  // Organizations Endpoints
+  async getOrganizations() {
+    return this.request('/organizations');
   }
 
-  async getCompany(id) {
-    return this.request(`/companies/${id}`);
+  async getOrganization(id) {
+    return this.request(`/organizations/${id}`);
   }
 
-  async createCompany(companyData) {
-    return this.request('/companies', {
+  async createOrganization(organizationData) {
+    return this.request('/organizations', {
       method: 'POST',
-      body: JSON.stringify(companyData),
+      body: JSON.stringify(organizationData),
     });
   }
 
-  async updateCompany(id, companyData) {
-    return this.request(`/companies/${id}`, {
+  async updateOrganization(id, organizationData) {
+    return this.request(`/organizations/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(companyData),
+      body: JSON.stringify(organizationData),
     });
   }
 
-  async deleteCompany(id) {
-    return this.request(`/companies/${id}`, {
+  async deleteOrganization(id) {
+    return this.request(`/organizations/${id}`, {
       method: 'DELETE',
     });
   }
 
-  // Sites Endpoints
-  async getSites() {
-    return this.request('/sites');
+  // Projects Endpoints
+  async getProjects() {
+    return this.request('/projects');
   }
 
-  async getSite(id) {
-    return this.request(`/sites/${id}`);
+  async getProject(id) {
+    return this.request(`/projects/${id}`);
   }
 
-  async createSite(siteData) {
-    return this.request('/sites', {
+  async createProject(projectData) {
+    return this.request('/projects', {
       method: 'POST',
-      body: JSON.stringify(siteData),
+      body: JSON.stringify(projectData),
     });
   }
 
-  async updateSite(id, siteData) {
-    return this.request(`/sites/${id}`, {
+  async updateProject(id, projectData) {
+    return this.request(`/projects/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(siteData),
+      body: JSON.stringify(projectData),
     });
   }
 
-  async deleteSite(id) {
-    return this.request(`/sites/${id}`, {
+  async deleteProject(id) {
+    return this.request(`/projects/${id}`, {
       method: 'DELETE',
     });
   }
 
   // Assets Endpoints
-  async getAssets(companyId = null, siteId = null) {
+  async getAssets(organizationId = null, projectId = null) {
     let query = '';
     const params = [];
-    if (companyId) params.push(`company_id=${companyId}`);
-    if (siteId) params.push(`site_id=${siteId}`);
+    if (organizationId) params.push(`organization_id=${organizationId}`);
+    if (projectId) params.push(`project_id=${projectId}`);
     if (params.length) query = `?${params.join('&')}`;
 
     return this.request(`/assets${query}`);
@@ -180,10 +180,10 @@ class ApiService {
   }
 
   // Scans Endpoints
-  async getScans(siteId = null, assetId = null) {
+  async getScans(projectId = null, assetId = null) {
     let query = '';
     const params = [];
-    if (siteId) params.push(`site_id=${siteId}`);
+    if (projectId) params.push(`project_id=${projectId}`);
     if (assetId) params.push(`asset_id=${assetId}`);
     if (params.length) query = `?${params.join('&')}`;
 

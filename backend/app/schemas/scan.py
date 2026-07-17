@@ -9,7 +9,7 @@ class ScanCreate(BaseModel):
     status: str = Field(default="pending", max_length=40)
     description: Optional[str] = None
     asset_id: Optional[int] = None
-    site_id: Optional[int] = None
+    project_id: Optional[int] = None
 
 
 class ScanUpdate(BaseModel):
@@ -19,7 +19,7 @@ class ScanUpdate(BaseModel):
     started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
     asset_id: Optional[int] = None
-    site_id: Optional[int] = None
+    project_id: Optional[int] = None
 
 
 class ScanOut(BaseModel):
@@ -30,7 +30,7 @@ class ScanOut(BaseModel):
     started_at: Optional[datetime] = None
     finished_at: Optional[datetime] = None
     asset_id: Optional[int] = None
-    site_id: Optional[int] = None
+    project_id: Optional[int] = None
     created_at: datetime
     updated_at: datetime
 

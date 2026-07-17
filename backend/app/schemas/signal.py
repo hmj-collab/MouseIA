@@ -9,7 +9,9 @@ class SignalCreate(BaseModel):
     severity: str = Field(min_length=1, max_length=40)
     confidence: int = Field(default=0, ge=0, le=100)
     description: Optional[str] = None
-    site_id: Optional[int] = None
+    asset_id: Optional[int] = None
+    finding_id: Optional[int] = None
+
 
 
 class SignalOut(BaseModel):
@@ -19,7 +21,9 @@ class SignalOut(BaseModel):
     severity: str
     confidence: int
     description: Optional[str] = None
-    site_id: Optional[int] = None
+    asset_id: Optional[int] = None
+    finding_id: Optional[int] = None
+
 
 
 class SignalUpdate(BaseModel):
@@ -28,4 +32,6 @@ class SignalUpdate(BaseModel):
     severity: Optional[str] = Field(default=None, min_length=1, max_length=40)
     confidence: Optional[int] = Field(default=None, ge=0, le=100)
     description: Optional[str] = None
-    site_id: Optional[int] = None
+    asset_id: Optional[int] = None
+    finding_id: Optional[int] = None
+

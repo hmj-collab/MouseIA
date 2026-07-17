@@ -14,6 +14,9 @@ class Signal(Base, TimestampMixin):
     severity = Column(String(40), nullable=False)
     confidence = Column(Integer, nullable=False, default=0)
     description = Column(Text, nullable=True)
-    site_id = Column(Integer, ForeignKey("sites.id"), nullable=True)
+    asset_id = Column(Integer, ForeignKey("assets.id"), nullable=True, index=True)
+    finding_id = Column(Integer, ForeignKey("findings.id"), nullable=True, index=True)
 
-    site = relationship("Site", backref="signals")
+    asset = relationship("Asset", backref="signals")
+    finding = relationship("Finding", foreign_keys=[finding_id], backref="signals")
+

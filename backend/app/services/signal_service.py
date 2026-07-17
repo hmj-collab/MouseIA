@@ -19,7 +19,7 @@ class SignalService:
         source: Optional[str] = None,
         signal_type: Optional[str] = None,
         severity: Optional[str] = None,
-        site_id: Optional[int] = None,
+        asset_id: Optional[int] = None,
         min_confidence: Optional[int] = None,
         max_confidence: Optional[int] = None,
     ) -> list[SignalOut]:
@@ -27,7 +27,7 @@ class SignalService:
             source=source,
             signal_type=signal_type,
             severity=severity,
-            site_id=site_id,
+            asset_id=asset_id,
             min_confidence=min_confidence,
             max_confidence=max_confidence,
         )
@@ -60,5 +60,7 @@ class SignalService:
             severity=signal.severity,
             confidence=signal.confidence,
             description=signal.description,
-            site_id=signal.site_id,
+            asset_id=signal.asset_id,
+            finding_id=signal.finding_id,
         )
+

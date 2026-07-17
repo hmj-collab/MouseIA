@@ -20,28 +20,43 @@ def test_vulnerabilities_and_recommendations_flow() -> None:
     admin_headers = _admin_headers()
     viewer_headers = _viewer_headers()
 
-    # 1. Create a site to run scans against
-    site_resp = client.post(
-        "/sites",
+    # 1. Create a project to run scans against
+    project_resp = client.post(
+        "/projects",
         json={
-            "name": "Correlated Vulnerability Site Target",
-            "url": "http://wordpress-test-correlation.local",
-            "description": "Site para testar motor de correlacao",
+            "name": "Correlated Vulnerability Project Target",
+            "description": "Projeto para testar motor de correlacao",
             "tags": ["test", "wp"],
         },
         headers=admin_headers,
     )
-    assert site_resp.status_code == 201
-    site_id = site_resp.json()["id"]
+    assert project_resp.status_code == 201
+    project_id = project_resp.json()["id"]
 
-    # 2. Create Scan linked to the site
+    # 1.5 Create a web_application asset for the project
+    asset_resp = client.post(
+        "/assets",
+        json={
+            "name": "Correlated Vulnerability Asset Target",
+            "asset_type": "web_application",
+            "value": "http://wordpress-test-correlation.local",
+            "description": "Ativo para testar correlacao",
+            "is_active": True,
+            "project_id": project_id,
+        },
+        headers=admin_headers,
+    )
+    assert asset_resp.status_code == 201
+    asset_id = asset_resp.json()["id"]
+
+    # 2. Create Scan linked to the project
     scan_resp = client.post(
         "/scans",
         json={
             "scan_type": "wordpress",
             "status": "pending",
             "description": "Varredura para teste de correlacao",
-            "site_id": site_id,
+            "project_id": project_id,
         },
         headers=admin_headers,
     )
@@ -112,4 +127,5 @@ def test_vulnerabilities_and_recommendations_flow() -> None:
     assert client.delete(f"/recommendations/{rec_id}", headers=admin_headers).status_code == 204
     assert client.delete(f"/vulnerabilities/{vuln_id}", headers=admin_headers).status_code == 204
     assert client.delete(f"/scans/{scan_id}", headers=admin_headers).status_code == 204
-    assert client.delete(f"/sites/{site_id}", headers=admin_headers).status_code == 204
+    assert client.delete(f"/assets/{asset_id}", headers=admin_headers).status_code == 204
+    assert client.delete(f"/projects/{project_id}", headers=admin_headers).status_code == 204

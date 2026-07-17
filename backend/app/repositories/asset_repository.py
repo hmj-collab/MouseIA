@@ -10,12 +10,12 @@ class AssetRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def list_assets(self, company_id: Optional[int] = None, site_id: Optional[int] = None) -> list[Asset]:
+    def list_assets(self, organization_id: Optional[int] = None, project_id: Optional[int] = None) -> list[Asset]:
         q = self.db.query(Asset)
-        if company_id is not None:
-            q = q.filter(Asset.company_id == company_id)
-        if site_id is not None:
-            q = q.filter(Asset.site_id == site_id)
+        if organization_id is not None:
+            q = q.filter(Asset.organization_id == organization_id)
+        if project_id is not None:
+            q = q.filter(Asset.project_id == project_id)
         return q.order_by(Asset.id).all()
 
     def get_by_id(self, asset_id: int) -> Optional[Asset]:

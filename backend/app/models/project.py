@@ -5,14 +5,13 @@ from app.database.mixins import TimestampMixin
 from app.database.session import Base
 
 
-class Site(Base, TimestampMixin):
-    __tablename__ = "sites"
+class Project(Base, TimestampMixin):
+    __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(120), nullable=False)
-    url = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     tags = Column(JSON, nullable=True)
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
 
-    company = relationship("Company", backref="sites")
+    organization = relationship("Organization", backref="projects")

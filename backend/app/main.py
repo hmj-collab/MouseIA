@@ -5,11 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.assets import router as assets_router
 from app.api.auth import router as auth_router
-from app.api.companies import router as companies_router
+from app.api.organizations import router as organizations_router
 from app.api.findings import router as findings_router
 from app.api.scans import router as scans_router
 from app.api.signals import router as signals_router
-from app.api.sites import router as sites_router
+from app.api.projects import router as projects_router
 from app.api.users import router as users_router
 from app.api.vulnerabilities import router as vulnerabilities_router
 from app.api.recommendations import router as recommendations_router
@@ -43,11 +43,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(auth_router)
-app.include_router(sites_router)
+app.include_router(projects_router)
 app.include_router(signals_router)
 app.include_router(findings_router)
 app.include_router(users_router)
-app.include_router(companies_router)
+app.include_router(organizations_router)
 app.include_router(assets_router)
 app.include_router(scans_router)
 app.include_router(vulnerabilities_router)

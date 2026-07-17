@@ -8,10 +8,10 @@ class ScanRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def list_scans(self, site_id: Optional[int] = None, asset_id: Optional[int] = None) -> list[Scan]:
+    def list_scans(self, project_id: Optional[int] = None, asset_id: Optional[int] = None) -> list[Scan]:
         q = self.db.query(Scan)
-        if site_id is not None:
-            q = q.filter(Scan.site_id == site_id)
+        if project_id is not None:
+            q = q.filter(Scan.project_id == project_id)
         if asset_id is not None:
             q = q.filter(Scan.asset_id == asset_id)
         return q.order_by(Scan.id.desc()).all()
@@ -25,7 +25,7 @@ class ScanRepository:
             status=payload.status,
             description=payload.description,
             asset_id=payload.asset_id,
-            site_id=payload.site_id,
+            project_id=payload.project_id,
         )
         self.db.add(scan)
         self.db.commit()

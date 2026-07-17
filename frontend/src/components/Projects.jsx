@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, Edit2, Globe, Building2, ExternalLink, X, Check } from 'lucide-react';
+import { Plus, Trash2, Edit2, Globe, Building2, X, Check } from 'lucide-react';
 import api from '../services/api';
 
-export default function Sites({ user }) {
+export default function Projects({ user }) {
   const isAdmin = user && user.role === 'admin';
   const [loading, setLoading] = useState(true);
-  const [sites, setSites] = useState([]);
-  const [companies, setCompanies] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
 
   // Modals / Forms States
-  const [showSiteModal, setShowSiteModal] = useState(false);
-  const [siteForm, setSiteForm] = useState({ id: null, name: '', url: '', description: '', tags: '', company_id: '' });
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [projectForm, setProjectForm] = useState({ id: null, name: '', description: '', tags: '', organization_id: '' });
 
-  const [showCompanyModal, setShowCompanyModal] = useState(false);
-  const [companyForm, setCompanyForm] = useState({ id: null, name: '', domain: '', description: '', is_active: true });
+  const [showOrganizationModal, setShowOrganizationModal] = useState(false);
+  const [organizationForm, setOrganizationForm] = useState({ id: null, name: '', domain: '', description: '', is_active: true });
 
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState('sites'); // 'sites' or 'companies'
+  const [activeTab, setActiveTab] = useState('projects'); // 'projects' or 'organizations'
 
   const loadData = async () => {
     setLoading(true);
     setError('');
     try {
-      const [sitesData, companiesData] = await Promise.all([
-        api.getSites(),
-        api.getCompanies()
+      const [projectsData, organizationsData] = await Promise.all([
+        api.getProjects(),
+        api.getOrganizations()
       ]);
-      setSites(sitesData);
-      setCompanies(companiesData);
+      setProjects(projectsData);
+      setOrganizations(organizationsData);
     } catch (err) {
       setError('Erro ao carregar dados do backend.');
     } finally {
@@ -40,99 +40,97 @@ export default function Sites({ user }) {
     loadData();
   }, []);
 
-  // Sites Handlers
-  const handleSiteSubmit = async (e) => {
+  // Projects Handlers
+  const handleProjectSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const tagsArray = siteForm.tags 
-        ? siteForm.tags.split(',').map(t => t.trim()).filter(Boolean) 
+      const tagsArray = projectForm.tags 
+        ? projectForm.tags.split(',').map(t => t.trim()).filter(Boolean) 
         : [];
       
       const payload = {
-        name: siteForm.name,
-        url: siteForm.url,
-        description: siteForm.description || null,
+        name: projectForm.name,
+        description: projectForm.description || null,
         tags: tagsArray,
-        company_id: siteForm.company_id ? Number(siteForm.company_id) : null
+        organization_id: projectForm.organization_id ? Number(projectForm.organization_id) : null
       };
 
-      if (siteForm.id) {
-        await api.updateSite(siteForm.id, payload);
+      if (projectForm.id) {
+        await api.updateProject(projectForm.id, payload);
       } else {
-        await api.createSite(payload);
+        await api.createProject(payload);
       }
-      setShowSiteModal(false);
+      setShowProjectModal(false);
       loadData();
     } catch (err) {
-      setError(err.message || 'Erro ao salvar site.');
+      setError(err.message || 'Erro ao salvar projeto.');
     }
   };
 
-  const handleEditSite = (site) => {
-    setSiteForm({
-      id: site.id,
-      name: site.name,
-      url: site.url,
-      description: site.description || '',
-      tags: site.tags ? site.tags.join(', ') : '',
-      company_id: site.company_id || ''
+  const handleEditProject = (project) => {
+    setProjectForm({
+      id: project.id,
+      name: project.name,
+      description: project.description || '',
+      tags: project.tags ? project.tags.join(', ') : '',
+      organization_id: project.organization_id || ''
     });
-    setShowSiteModal(true);
+    setShowProjectModal(true);
   };
 
-  const handleDeleteSite = async (id) => {
-    if (!window.confirm('Tem certeza de que deseja deletar este site?')) return;
+  const handleDeleteProject = async (id) => {
+    if (!window.confirm('Tem certeza de que deseja deletar este projeto?')) return;
     try {
-      await api.deleteSite(id);
+      await api.deleteProject(id);
       loadData();
     } catch (err) {
-      alert(err.message || 'Erro ao deletar site.');
+      alert(err.message || 'Erro ao deletar projeto.');
     }
   };
 
-  // Companies Handlers
-  const handleCompanySubmit = async (e) => {
+  // Organizations Handlers
+  const handleOrganizationSubmit = async (e) => {
     e.preventDefault();
     setError('');
     try {
       const payload = {
-        name: companyForm.name,
-        domain: companyForm.domain || null,
-        description: companyForm.description || null,
-        is_active: companyForm.is_active
+        name: organizationForm.name,
+        domain: organizationForm.domain || null,
+        description: organizationForm.description || null,
+        is_active: organizationForm.is_active
       };
 
-      if (companyForm.id) {
-        await api.updateCompany(companyForm.id, payload);
+      if (organizationForm.id) {
+        await api.updateOrganization(organizationForm.id, payload);
       } else {
-        await api.createCompany(payload);
+        await api.createOrganization(payload);
       }
-      setShowCompanyModal(false);
+      setShowOrganizationModal(false);
       loadData();
     } catch (err) {
-      setError(err.message || 'Erro ao salvar empresa.');
+      setError(err.message || 'Erro ao salvar organização.');
     }
   };
 
-  const handleEditCompany = (company) => {
-    setCompanyForm({
-      id: company.id,
-      name: company.name,
-      domain: company.domain || '',
-      description: company.description || '',
-      is_active: company.is_active
+  const handleEditOrganization = (org) => {
+    setOrganizationForm({
+      id: org.id,
+      name: org.name,
+      domain: org.domain || '',
+      description: org.description || '',
+      is_active: org.is_active
     });
-    setShowCompanyModal(true);
+    setShowOrganizationModal(true);
   };
 
-  const handleDeleteCompany = async (id) => {
-    if (!window.confirm('Tem certeza de que deseja deletar esta empresa? Isso pode impactar sites e ativos vinculados.')) return;
+  const handleDeleteOrganization = async (id) => {
+    if (!window.confirm('Tem certeza de que deseja deletar esta organização? Isso pode impactar projetos e ativos vinculados.')) return;
     try {
-      await api.deleteCompany(id);
+      await api.deleteOrganization(id);
       loadData();
     } catch (err) {
-      alert(err.message || 'Erro ao deletar empresa.');
+      alert(err.message || 'Erro ao deletar organização.');
     }
   };
 
@@ -150,7 +148,7 @@ export default function Sites({ user }) {
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Gestão de Escopo</h1>
           <p style={{ color: 'var(--text-secondary)' }}>
-            Gerencie sites e empresas cadastrados na sua superfície de ataque.
+            Gerencie organizações e projetos cadastrados na sua superfície de ataque.
           </p>
         </div>
         
@@ -158,16 +156,16 @@ export default function Sites({ user }) {
         {isAdmin && (
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button className="primary" onClick={() => {
-              setSiteForm({ id: null, name: '', url: '', description: '', tags: '', company_id: '' });
-              setShowSiteModal(true);
+              setProjectForm({ id: null, name: '', description: '', tags: '', organization_id: '' });
+              setShowProjectModal(true);
             }}>
-              <Plus size={18} /> Adicionar Assets
+              <Plus size={18} /> Adicionar Projeto
             </button>
             <button className="secondary" onClick={() => {
-              setCompanyForm({ id: null, name: '', domain: '', description: '', is_active: true });
-              setShowCompanyModal(true);
+              setOrganizationForm({ id: null, name: '', domain: '', description: '', is_active: true });
+              setShowOrganizationModal(true);
             }}>
-              <Plus size={18} /> Nova Empresa
+              <Plus size={18} /> Nova Organização
             </button>
           </div>
         )}
@@ -191,26 +189,26 @@ export default function Sites({ user }) {
       <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '1px' }}>
         <button
           className="nav-item"
-          style={{ borderBottom: activeTab === 'sites' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
-          onClick={() => setActiveTab('sites')}
+          style={{ borderBottom: activeTab === 'projects' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
+          onClick={() => setActiveTab('projects')}
         >
-          <Globe size={18} /> Sites ({sites.length})
+          <Globe size={18} /> Projetos ({projects.length})
         </button>
         <button
           className="nav-item"
-          style={{ borderBottom: activeTab === 'companies' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
-          onClick={() => setActiveTab('companies')}
+          style={{ borderBottom: activeTab === 'organizations' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
+          onClick={() => setActiveTab('organizations')}
         >
-          <Building2 size={18} /> Empresas ({companies.length})
+          <Building2 size={18} /> Organizações ({organizations.length})
         </button>
       </div>
 
-      {activeTab === 'sites' ? (
-        /* SITES LIST */
+      {activeTab === 'projects' ? (
+        /* PROJECTS LIST */
         <div className="glass-card" style={{ overflow: 'hidden' }}>
-          {sites.length === 0 ? (
+          {projects.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhum site cadastrado ainda.
+              Nenhum projeto cadastrado ainda.
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -218,33 +216,25 @@ export default function Sites({ user }) {
                 <thead>
                   <tr>
                     <th>Nome</th>
-                    <th>URL</th>
-                    <th>Empresa</th>
+                    <th>Descrição</th>
+                    <th>Organização</th>
                     <th>Tags</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sites.map(site => {
-                    const company = companies.find(c => c.id === site.company_id);
+                  {projects.map(project => {
+                    const org = organizations.find(o => o.id === project.organization_id);
                     return (
-                      <tr key={site.id}>
-                        <td style={{ fontWeight: 600 }}>{site.name}</td>
-                        <td>
-                          <a href={site.url} target="_blank" rel="noopener noreferrer" style={{
-                            color: 'var(--color-primary)',
-                            textDecoration: 'none',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}>
-                            {site.url} <ExternalLink size={12} />
-                          </a>
+                      <tr key={project.id}>
+                        <td style={{ fontWeight: 600 }}>{project.name}</td>
+                        <td style={{ color: 'var(--text-secondary)', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {project.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem descrição</span>}
                         </td>
                         <td>
-                          {company ? (
+                          {org ? (
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Building2 size={14} style={{ color: 'var(--text-muted)' }} /> {company.name}
+                              <Building2 size={14} style={{ color: 'var(--text-muted)' }} /> {org.name}
                             </span>
                           ) : (
                             <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Nenhuma</span>
@@ -252,7 +242,7 @@ export default function Sites({ user }) {
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                            {site.tags && site.tags.map((tag, idx) => (
+                            {project.tags && project.tags.map((tag, idx) => (
                               <span key={idx} className="badge info" style={{ fontSize: '0.65rem' }}>
                                 {tag}
                               </span>
@@ -261,11 +251,11 @@ export default function Sites({ user }) {
                         </td>
                         <td>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
-                            <button className="secondary" style={{ padding: '0.4rem' }} onClick={() => handleEditSite(site)}>
+                            <button className="secondary" style={{ padding: '0.4rem' }} onClick={() => handleEditProject(project)}>
                               <Edit2 size={14} />
                             </button>
                             {isAdmin && (
-                              <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteSite(site.id)}>
+                              <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteProject(project.id)}>
                                 <Trash2 size={14} />
                               </button>
                             )}
@@ -280,11 +270,11 @@ export default function Sites({ user }) {
           )}
         </div>
       ) : (
-        /* COMPANIES LIST */
+        /* ORGANIZATIONS LIST */
         <div className="glass-card" style={{ overflow: 'hidden' }}>
-          {companies.length === 0 ? (
+          {organizations.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhuma empresa cadastrada ainda.
+              Nenhuma organização cadastrada ainda.
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -299,26 +289,26 @@ export default function Sites({ user }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {companies.map(company => (
-                    <tr key={company.id}>
-                      <td style={{ fontWeight: 600 }}>{company.name}</td>
-                      <td>{company.domain || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
+                  {organizations.map(org => (
+                    <tr key={org.id}>
+                      <td style={{ fontWeight: 600 }}>{org.name}</td>
+                      <td>{org.domain || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
                       <td style={{ color: 'var(--text-secondary)', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {company.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem descrição</span>}
+                        {org.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem descrição</span>}
                       </td>
                       <td>
-                        <span className={`badge ${company.is_active ? 'success' : 'medium'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                          {company.is_active ? <Check size={10} /> : <X size={10} />}
-                          {company.is_active ? 'Ativa' : 'Inativa'}
+                        <span className={`badge ${org.is_active ? 'success' : 'medium'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                          {org.is_active ? <Check size={10} /> : <X size={10} />}
+                          {org.is_active ? 'Ativa' : 'Inativa'}
                         </span>
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button className="secondary" style={{ padding: '0.4rem' }} onClick={() => handleEditCompany(company)}>
+                          <button className="secondary" style={{ padding: '0.4rem' }} onClick={() => handleEditOrganization(org)}>
                             <Edit2 size={14} />
                           </button>
                           {isAdmin && (
-                            <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteCompany(company.id)}>
+                            <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteOrganization(org.id)}>
                               <Trash2 size={14} />
                             </button>
                           )}
@@ -333,8 +323,8 @@ export default function Sites({ user }) {
         </div>
       )}
 
-      {/* SITES MODAL */}
-      {showSiteModal && createPortal(
+      {/* PROJECTS MODAL */}
+      {showProjectModal && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -345,45 +335,34 @@ export default function Sites({ user }) {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                {siteForm.id ? 'Editar Site' : 'Adicionar Novo Asset'}
+                {projectForm.id ? 'Editar Projeto' : 'Adicionar Novo Projeto'}
               </h2>
-              <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setShowSiteModal(false)}>
+              <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setShowProjectModal(false)}>
                 <X size={20} />
               </button>
             </div>
             
-            <form onSubmit={handleSiteSubmit}>
+            <form onSubmit={handleProjectSubmit}>
               <div className="form-group">
-                <label>Nome do Asset</label>
+                <label>Nome do Projeto</label>
                 <input
                   type="text"
                   placeholder="Ex: E-commerce Principal"
-                  value={siteForm.name}
-                  onChange={(e) => setSiteForm({ ...siteForm, name: e.target.value })}
+                  value={projectForm.name}
+                  onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>URL (Endereço)</label>
-                <input
-                  type="url"
-                  placeholder="https://meusite.com"
-                  value={siteForm.url}
-                  onChange={(e) => setSiteForm({ ...siteForm, url: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Empresa Vinculada</label>
+                <label>Organização Vinculada</label>
                 <select
-                  value={siteForm.company_id}
-                  onChange={(e) => setSiteForm({ ...siteForm, company_id: e.target.value })}
+                  value={projectForm.organization_id}
+                  onChange={(e) => setProjectForm({ ...projectForm, organization_id: e.target.value })}
                 >
                   <option value="">-- Nenhuma --</option>
-                  {companies.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                  {organizations.map(o => (
+                    <option key={o.id} value={o.id}>{o.name}</option>
                   ))}
                 </select>
               </div>
@@ -393,8 +372,8 @@ export default function Sites({ user }) {
                 <input
                   type="text"
                   placeholder="producao, principal, wordpress"
-                  value={siteForm.tags}
-                  onChange={(e) => setSiteForm({ ...siteForm, tags: e.target.value })}
+                  value={projectForm.tags}
+                  onChange={(e) => setProjectForm({ ...projectForm, tags: e.target.value })}
                 />
               </div>
 
@@ -402,14 +381,14 @@ export default function Sites({ user }) {
                 <label>Descrição</label>
                 <textarea
                   rows="3"
-                  placeholder="Detalhes ou observações sobre este site..."
-                  value={siteForm.description}
-                  onChange={(e) => setSiteForm({ ...siteForm, description: e.target.value })}
+                  placeholder="Detalhes ou observações sobre este projeto..."
+                  value={projectForm.description}
+                  onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })}
                 ></textarea>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
-                <button type="button" className="secondary" onClick={() => setShowSiteModal(false)}>Cancelar</button>
+                <button type="button" className="secondary" onClick={() => setShowProjectModal(false)}>Cancelar</button>
                 <button type="submit" className="primary">Salvar</button>
               </div>
             </form>
@@ -418,8 +397,8 @@ export default function Sites({ user }) {
         document.body
       )}
 
-      {/* COMPANIES MODAL */}
-      {showCompanyModal && createPortal(
+      {/* ORGANIZATIONS MODAL */}
+      {showOrganizationModal && createPortal(
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
           background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(4px)',
@@ -430,21 +409,21 @@ export default function Sites({ user }) {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                {companyForm.id ? 'Editar Empresa' : 'Adicionar Nova Empresa'}
+                {organizationForm.id ? 'Editar Organização' : 'Adicionar Nova Organização'}
               </h2>
-              <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setShowCompanyModal(false)}>
+              <button className="secondary" style={{ padding: '4px', border: 'none' }} onClick={() => setShowOrganizationModal(false)}>
                 <X size={20} />
               </button>
             </div>
             
-            <form onSubmit={handleCompanySubmit}>
+            <form onSubmit={handleOrganizationSubmit}>
               <div className="form-group">
-                <label>Nome da Empresa</label>
+                <label>Nome da Organização</label>
                 <input
                   type="text"
                   placeholder="Ex: Grupo Alpha SA"
-                  value={companyForm.name}
-                  onChange={(e) => setCompanyForm({ ...companyForm, name: e.target.value })}
+                  value={organizationForm.name}
+                  onChange={(e) => setOrganizationForm({ ...organizationForm, name: e.target.value })}
                   required
                 />
               </div>
@@ -454,8 +433,8 @@ export default function Sites({ user }) {
                 <input
                   type="text"
                   placeholder="Ex: grupoalpha.com"
-                  value={companyForm.domain}
-                  onChange={(e) => setCompanyForm({ ...companyForm, domain: e.target.value })}
+                  value={organizationForm.domain}
+                  onChange={(e) => setOrganizationForm({ ...organizationForm, domain: e.target.value })}
                 />
               </div>
 
@@ -463,9 +442,9 @@ export default function Sites({ user }) {
                 <label>Descrição</label>
                 <textarea
                   rows="3"
-                  placeholder="Informações adicionais da empresa..."
-                  value={companyForm.description}
-                  onChange={(e) => setCompanyForm({ ...companyForm, description: e.target.value })}
+                  placeholder="Informações adicionais da organização..."
+                  value={organizationForm.description}
+                  onChange={(e) => setOrganizationForm({ ...organizationForm, description: e.target.value })}
                 ></textarea>
               </div>
 
@@ -473,15 +452,15 @@ export default function Sites({ user }) {
                 <input
                   id="is_active"
                   type="checkbox"
-                  checked={companyForm.is_active}
-                  onChange={(e) => setCompanyForm({ ...companyForm, is_active: e.target.checked })}
+                  checked={organizationForm.is_active}
+                  onChange={(e) => setOrganizationForm({ ...organizationForm, is_active: e.target.checked })}
                   style={{ width: 'auto', display: 'inline' }}
                 />
-                <label htmlFor="is_active" style={{ display: 'inline', margin: 0, textTransform: 'none' }}>Empresa Ativa</label>
+                <label htmlFor="is_active" style={{ display: 'inline', margin: 0, textTransform: 'none' }}>Organização Ativa</label>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem' }}>
-                <button type="button" className="secondary" onClick={() => setShowCompanyModal(false)}>Cancelar</button>
+                <button type="button" className="secondary" onClick={() => setShowOrganizationModal(false)}>Cancelar</button>
                 <button type="submit" className="primary">Salvar</button>
               </div>
             </form>

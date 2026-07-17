@@ -15,7 +15,7 @@ class Scan(Base, TimestampMixin):
     started_at = Column(DateTime(timezone=True), nullable=True)
     finished_at = Column(DateTime(timezone=True), nullable=True)
     asset_id = Column(Integer, ForeignKey("assets.id"), nullable=True, index=True)
-    site_id = Column(Integer, ForeignKey("sites.id"), nullable=True, index=True)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=True, index=True)
 
     asset = relationship("Asset", backref="scans")
-    site = relationship("Site", backref="scans")
+    project = relationship("Project", backref="scans")

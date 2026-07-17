@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
-def test_viewer_cannot_create_site() -> None:
+def test_viewer_cannot_create_project() -> None:
     client = TestClient(app)
 
     login_response = client.post(
@@ -16,10 +16,9 @@ def test_viewer_cannot_create_site() -> None:
     headers = {"Authorization": f"Bearer {token}"}
 
     create_response = client.post(
-        "/sites",
+        "/projects",
         json={
-            "name": "Forbidden Site",
-            "url": "https://example.org",
+            "name": "Forbidden Project",
             "description": "Should not be created",
             "tags": ["forbidden"],
         },

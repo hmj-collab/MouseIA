@@ -12,12 +12,12 @@ router = APIRouter(prefix="/assets", tags=["assets"])
 
 @router.get("", response_model=list[AssetOut])
 def list_assets(
-    company_id: Optional[int] = None,
-    site_id: Optional[int] = None,
+    organization_id: Optional[int] = None,
+    project_id: Optional[int] = None,
     db: Session = Depends(get_db),
     user: dict[str, str] = Depends(require_role("admin", "viewer")),
 ) -> list[AssetOut]:
-    return AssetService(db).list_assets(company_id=company_id, site_id=site_id)
+    return AssetService(db).list_assets(organization_id=organization_id, project_id=project_id)
 
 
 @router.post("", response_model=AssetOut, status_code=status.HTTP_201_CREATED)

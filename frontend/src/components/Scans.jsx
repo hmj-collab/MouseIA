@@ -13,15 +13,15 @@ export default function Scans({ user }) {
   // Data States
   const [assets, setAssets] = useState([]);
   const [scans, setScans] = useState([]);
-  const [sites, setSites] = useState([]);
-  const [companies, setCompanies] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [organizations, setOrganizations] = useState([]);
 
   // Modals / Forms States
   const [showAssetModal, setShowAssetModal] = useState(false);
-  const [assetForm, setAssetForm] = useState({ id: null, name: '', asset_type: 'url', value: '', description: '', company_id: '', site_id: '' });
+  const [assetForm, setAssetForm] = useState({ id: null, name: '', asset_type: 'url', value: '', description: '', organization_id: '', project_id: '' });
 
   const [showScanModal, setShowScanModal] = useState(false);
-  const [scanForm, setScanForm] = useState({ id: null, scan_type: 'wordpress', description: '', asset_id: '', site_id: '' });
+  const [scanForm, setScanForm] = useState({ id: null, scan_type: 'wordpress', description: '', asset_id: '', project_id: '' });
   const [selectedScanLogs, setSelectedScanLogs] = useState(null);
 
   const [activeTab, setActiveTab] = useState('scans'); // 'scans' or 'assets'
@@ -32,16 +32,16 @@ export default function Scans({ user }) {
     setLoading(true);
     setError('');
     try {
-      const [assetsData, scansData, sitesData, companiesData] = await Promise.all([
+      const [assetsData, scansData, projectsData, organizationsData] = await Promise.all([
         api.getAssets(),
         api.getScans(),
-        api.getSites(),
-        api.getCompanies()
+        api.getProjects(),
+        api.getOrganizations()
       ]);
       setAssets(assetsData);
       setScans(scansData);
-      setSites(sitesData);
-      setCompanies(companiesData);
+      setProjects(projectsData);
+      setOrganizations(organizationsData);
     } catch (err) {
       setError('Erro ao carregar dados do console.');
     } finally {
@@ -63,8 +63,8 @@ export default function Scans({ user }) {
         asset_type: assetForm.asset_type,
         value: assetForm.value,
         description: assetForm.description || null,
-        company_id: assetForm.company_id ? Number(assetForm.company_id) : null,
-        site_id: assetForm.site_id ? Number(assetForm.site_id) : null,
+        organization_id: assetForm.organization_id ? Number(assetForm.organization_id) : null,
+        project_id: assetForm.project_id ? Number(assetForm.project_id) : null,
         is_active: true
       };
 
@@ -87,8 +87,8 @@ export default function Scans({ user }) {
       asset_type: asset.asset_type,
       value: asset.value,
       description: asset.description || '',
-      company_id: asset.company_id || '',
-      site_id: asset.site_id || ''
+      organization_id: asset.organization_id || '',
+      project_id: asset.project_id || ''
     });
     setShowAssetModal(true);
   };
@@ -113,7 +113,7 @@ export default function Scans({ user }) {
         status: 'pending',
         description: scanForm.description || null,
         asset_id: scanForm.asset_id ? Number(scanForm.asset_id) : null,
-        site_id: scanForm.site_id ? Number(scanForm.site_id) : null
+        project_id: scanForm.project_id ? Number(scanForm.project_id) : null
       };
 
       await api.createScan(payload);
@@ -172,13 +172,13 @@ export default function Scans({ user }) {
         {isAdmin && (
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button className="primary" onClick={() => {
-              setScanForm({ id: null, scan_type: 'wordpress', description: '', asset_id: '', site_id: '' });
+              setScanForm({ id: null, scan_type: 'wordpress', description: '', asset_id: '', project_id: '' });
               setShowScanModal(true);
             }}>
               <Play size={18} style={{ transform: 'rotate(0deg)' }} /> Executar Novo Scan
             </button>
             <button className="secondary" onClick={() => {
-              setAssetForm({ id: null, name: '', asset_type: 'url', value: '', description: '', company_id: '', site_id: '' });
+              setAssetForm({ id: null, name: '', asset_type: 'url', value: '', description: '', organization_id: '', project_id: '' });
               setShowAssetModal(true);
             }}>
               <Plus size={18} /> Novo Ativo
@@ -242,10 +242,10 @@ export default function Scans({ user }) {
                 </thead>
                 <tbody>
                   {scans.map(scan => {
-                    const site = sites.find(s => s.id === scan.site_id);
+                    const project = projects.find(p => p.id === scan.project_id);
                     const asset = assets.find(a => a.id === scan.asset_id);
-                    const targetName = site ? `Site: ${site.name}` : asset ? `Ativo: ${asset.name}` : 'Nenhum';
-                    const targetVal = site ? site.url : asset ? asset.value : null;
+                    const targetName = project ? `Projeto: ${project.name}` : asset ? `Ativo: ${asset.name}` : 'Nenhum';
+                    const targetVal = asset ? asset.value : null;
 
                     const isRunning = runningScans[scan.id];
 
@@ -344,13 +344,13 @@ export default function Scans({ user }) {
                     <th>Nome</th>
                     <th>Tipo</th>
                     <th>Valor do Ativo</th>
-                    <th>Site Relacionado</th>
+                    <th>Projeto Relacionado</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {assets.map(asset => {
-                    const site = sites.find(s => s.id === asset.site_id);
+                    const project = projects.find(p => p.id === asset.project_id);
                     return (
                       <tr key={asset.id}>
                         <td style={{ fontWeight: 600 }}>{asset.name}</td>
@@ -361,9 +361,9 @@ export default function Scans({ user }) {
                           {asset.value}
                         </td>
                         <td>
-                          {site ? (
+                          {project ? (
                             <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Globe size={14} style={{ color: 'var(--text-muted)' }} /> {site.name}
+                              <Globe size={14} style={{ color: 'var(--text-muted)' }} /> {project.name}
                             </span>
                           ) : (
                             <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Nenhum</span>
@@ -372,7 +372,7 @@ export default function Scans({ user }) {
                         <td>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button className="secondary" style={{ padding: '0.4rem' }} onClick={() => handleEditAsset(asset)}>
-                              <Trash2 size={14} style={{ display: 'none' }} /> Editar
+                              Editar
                             </button>
                             {isAdmin && (
                               <button className="secondary" style={{ padding: '0.4rem', color: 'var(--color-danger)' }} onClick={() => handleDeleteAsset(asset.id)}>
@@ -448,27 +448,27 @@ export default function Scans({ user }) {
               </div>
 
               <div className="form-group">
-                <label>Empresa Relacionada</label>
+                <label>Organização Relacionada</label>
                 <select
-                  value={assetForm.company_id}
-                  onChange={(e) => setAssetForm({ ...assetForm, company_id: e.target.value })}
+                  value={assetForm.organization_id}
+                  onChange={(e) => setAssetForm({ ...assetForm, organization_id: e.target.value })}
                 >
                   <option value="">-- Nenhuma --</option>
-                  {companies.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
+                  {organizations.map(o => (
+                    <option key={o.id} value={o.id}>{o.name}</option>
                   ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label>Site Relacionado</label>
+                <label>Projeto Relacionado</label>
                 <select
-                  value={assetForm.site_id}
-                  onChange={(e) => setAssetForm({ ...assetForm, site_id: e.target.value })}
+                  value={assetForm.project_id}
+                  onChange={(e) => setAssetForm({ ...assetForm, project_id: e.target.value })}
                 >
                   <option value="">-- Nenhum --</option>
-                  {sites.map(s => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
+                  {projects.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </select>
               </div>
@@ -528,19 +528,19 @@ export default function Scans({ user }) {
 
               <div style={{ borderTop: '1px solid var(--border-color)', margin: '1.5rem 0', paddingTop: '1rem' }}>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  Escolha um Site **OU** um Ativo para ser o alvo do escopo desta varredura:
+                  Escolha um Projeto **OU** um Ativo para ser o alvo do escopo desta varredura:
                 </p>
                 
                 <div className="form-group">
-                  <label>Alvo: Site</label>
+                  <label>Alvo: Projeto</label>
                   <select
-                    value={scanForm.site_id}
+                    value={scanForm.project_id}
                     disabled={scanForm.asset_id !== ''}
-                    onChange={(e) => setScanForm({ ...scanForm, site_id: e.target.value })}
+                    onChange={(e) => setScanForm({ ...scanForm, project_id: e.target.value })}
                   >
-                    <option value="">-- Escolher Site --</option>
-                    {sites.map(s => (
-                      <option key={s.id} value={s.id}>{s.name} ({s.url})</option>
+                    <option value="">-- Escolher Projeto --</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
                   </select>
                 </div>
@@ -551,7 +551,7 @@ export default function Scans({ user }) {
                   <label>Alvo: Ativo Técnico</label>
                   <select
                     value={scanForm.asset_id}
-                    disabled={scanForm.site_id !== ''}
+                    disabled={scanForm.project_id !== ''}
                     onChange={(e) => setScanForm({ ...scanForm, asset_id: e.target.value })}
                   >
                     <option value="">-- Escolher Ativo --</option>

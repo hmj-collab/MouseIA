@@ -16,7 +16,7 @@ def list_signals(
     source: Optional[str] = None,
     signal_type: Optional[str] = None,
     severity: Optional[str] = None,
-    site_id: Optional[int] = None,
+    asset_id: Optional[int] = None,
     min_confidence: Optional[int] = None,
     max_confidence: Optional[int] = None,
     db: Session = Depends(get_db),
@@ -26,7 +26,7 @@ def list_signals(
         source=source,
         signal_type=signal_type,
         severity=severity,
-        site_id=site_id,
+        asset_id=asset_id,
         min_confidence=min_confidence,
         max_confidence=max_confidence,
     )

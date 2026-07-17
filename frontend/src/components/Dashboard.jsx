@@ -8,7 +8,7 @@ import api from '../services/api';
 export default function Dashboard({ user, onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    sites: 0,
+    projects: 0,
     assets: 0,
     scans: 0,
     signals: 0,
@@ -21,8 +21,8 @@ export default function Dashboard({ user, onNavigate }) {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [sites, assets, scans, signals, findings] = await Promise.all([
-        api.getSites(),
+      const [projects, assets, scans, signals, findings] = await Promise.all([
+        api.getProjects(),
         api.getAssets(),
         api.getScans(),
         api.getSignals(),
@@ -41,7 +41,7 @@ export default function Dashboard({ user, onNavigate }) {
       });
 
       setStats({
-        sites: sites.length,
+        projects: projects.length,
         assets: assets.length,
         scans: scans.length,
         signals: signals.length,
@@ -93,8 +93,8 @@ export default function Dashboard({ user, onNavigate }) {
             <Globe size={24} />
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Assets</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>{stats.sites}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 600 }}>Projetos</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 700, lineHeight: 1.2 }}>{stats.projects}</div>
           </div>
         </div>
 

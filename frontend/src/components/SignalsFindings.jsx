@@ -7,7 +7,8 @@ export default function SignalsFindings({ user }) {
   const [loading, setLoading] = useState(true);
   const [signals, setSignals] = useState([]);
   const [findings, setFindings] = useState([]);
-  const [sites, setSites] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [assets, setAssets] = useState([]);
   const [vulnerabilities, setVulnerabilities] = useState([]);
 
   // Filtering / Tabs
@@ -22,15 +23,17 @@ export default function SignalsFindings({ user }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [signalsData, findingsData, sitesData, vulnsData] = await Promise.all([
+      const [signalsData, findingsData, projectsData, assetsData, vulnsData] = await Promise.all([
         api.getSignals(),
         api.getFindings(),
-        api.getSites(),
+        api.getProjects(),
+        api.getAssets(),
         api.getVulnerabilities()
       ]);
       setSignals(signalsData);
       setFindings(findingsData);
-      setSites(sitesData);
+      setProjects(projectsData);
+      setAssets(assetsData);
       setVulnerabilities(vulnsData);
     } catch (err) {
       console.error("Erro ao carregar sinais e achados", err);
@@ -50,10 +53,12 @@ export default function SignalsFindings({ user }) {
     return <AlertCircle size={16} style={{ color: 'var(--color-primary)' }} />;
   };
 
-  const getSiteName = (siteId) => {
-    if (!siteId) return 'Nenhum';
-    const site = sites.find(s => s.id === siteId);
-    return site ? site.name : `Site #${siteId}`;
+  const getAssetDetails = (assetId) => {
+    if (!assetId) return 'Nenhum';
+    const asset = assets.find(a => a.id === assetId);
+    if (!asset) return `Ativo #${assetId}`;
+    const project = projects.find(p => p.id === asset.project_id);
+    return project ? `${asset.name} (${project.name})` : asset.name;
   };
 
   // Filter lists
@@ -98,63 +103,50 @@ export default function SignalsFindings({ user }) {
         
         {/* Severity filter */}
         <div style={{ minWidth: '150px' }}>
-          <select 
-            value={severityFilter} 
-            onChange={(e) => setSeverityFilter(e.target.value)}
-            style={{ padding: '0.45rem', fontSize: '0.8rem' }}
-          >
+          <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)} style={{ padding: '0.45rem', fontSize: '0.8rem' }}>
             <option value="">-- Severidade --</option>
             <option value="critical">Crítica</option>
             <option value="high">Alta</option>
             <option value="medium">Média</option>
             <option value="low">Baixa</option>
-            <option value="info">Informativa</option>
+            <option value="info">Info</option>
           </select>
         </div>
 
-        {/* Status filter (only for Findings) */}
+        {/* Status filter (only for findings) */}
         {activeTab === 'findings' && (
           <div style={{ minWidth: '150px' }}>
-            <select 
-              value={statusFilter} 
-              onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ padding: '0.45rem', fontSize: '0.8rem' }}
-            >
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ padding: '0.45rem', fontSize: '0.8rem' }}>
               <option value="">-- Status --</option>
               <option value="open">Aberto (Open)</option>
-              <option value="mitigated">Mitigado (Mitigated)</option>
-              <option value="accepted">Aceito (Accepted)</option>
               <option value="resolved">Resolvido (Resolved)</option>
+              <option value="mitigated">Mitigado (Mitigated)</option>
             </select>
           </div>
         )}
 
         {(severityFilter || statusFilter) && (
-          <button 
-            className="secondary" 
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', border: 'none' }}
-            onClick={() => { setSeverityFilter(''); setStatusFilter(''); }}
-          >
+          <button className="secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem', border: 'none' }} onClick={() => { setSeverityFilter(''); setStatusFilter(''); }}>
             Limpar Filtros
           </button>
         )}
       </div>
 
-      {/* Tabs */}
+      {/* Navigation tabs */}
       <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '1px' }}>
         <button
           className="nav-item"
           style={{ borderBottom: activeTab === 'findings' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('findings')}
         >
-          <ShieldAlert size={18} /> Detectados ({filteredFindings.length})
+          <ShieldAlert size={18} /> Achados / Findings ({filteredFindings.length})
         </button>
         <button
           className="nav-item"
           style={{ borderBottom: activeTab === 'signals' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('signals')}
         >
-          <Server size={18} /> Sinais Brutos ({filteredSignals.length})
+          <Server size={18} /> Sinais Brutos / Signals ({filteredSignals.length})
         </button>
       </div>
 
@@ -163,7 +155,7 @@ export default function SignalsFindings({ user }) {
         <div className="glass-card" style={{ overflow: 'hidden' }}>
           {filteredFindings.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              Nenhum detectado encontrado para os filtros atuais.
+              Nenhum achado encontrado para os filtros atuais.
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -174,18 +166,18 @@ export default function SignalsFindings({ user }) {
                     <th>Descrição</th>
                     <th>Severidade</th>
                     <th>Status</th>
-                    <th>Sinal Vinculado</th>
+                    <th>Sinal Origem</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredFindings.map(finding => (
                     <tr key={finding.id}>
-                      <td style={{ fontWeight: 600, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {finding.title}
+                      <td style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {getSeverityIcon(finding.severity)} {finding.title}
                       </td>
-                      <td style={{ color: 'var(--text-secondary)', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {finding.description || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Sem descrição</span>}
+                      <td style={{ color: 'var(--text-secondary)', maxWidth: '280px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {finding.description || 'Sem detalhes.'}
                       </td>
                       <td>
                         <span className={`badge ${(finding.severity || 'info').toLowerCase()}`}>
@@ -193,10 +185,7 @@ export default function SignalsFindings({ user }) {
                         </span>
                       </td>
                       <td>
-                        <span className={`badge ${
-                          finding.status === 'resolved' || finding.status === 'mitigated' ? 'success' : 
-                          finding.status === 'accepted' ? 'info' : 'high'
-                        }`}>
+                        <span className={`badge ${finding.status === 'resolved' || finding.status === 'mitigated' ? 'success' : 'high'}`}>
                           {finding.status}
                         </span>
                       </td>
@@ -236,7 +225,7 @@ export default function SignalsFindings({ user }) {
                     <th>Descrição</th>
                     <th>Severidade</th>
                     <th>Confiança</th>
-                    <th>Site Alvo</th>
+                    <th>Ativo Alvo</th>
                     <th>Ações</th>
                   </tr>
                 </thead>
@@ -264,7 +253,7 @@ export default function SignalsFindings({ user }) {
                           </div>
                         </div>
                       </td>
-                      <td>{getSiteName(signal.site_id)}</td>
+                      <td>{getAssetDetails(signal.asset_id)}</td>
                       <td>
                         <button className="secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }} onClick={() => {
                           setSelectedItem(signal);
@@ -404,8 +393,8 @@ export default function SignalsFindings({ user }) {
                     <div style={{ fontWeight: 700 }}>{selectedItem.confidence}%</div>
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.25rem' }}>Site</div>
-                    <div>{getSiteName(selectedItem.site_id)}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, marginBottom: '0.25rem' }}>Ativo</div>
+                    <div>{getAssetDetails(selectedItem.asset_id)}</div>
                   </div>
                 </div>
 

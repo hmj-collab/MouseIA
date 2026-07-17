@@ -14,6 +14,6 @@ class User(Base, TimestampMixin):
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(40), nullable=False, default="viewer")
     is_active = Column(Boolean, nullable=False, default=True)
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=True, index=True)
+    organization_id = Column(Integer, ForeignKey("organizations.id"), nullable=True, index=True)
 
-    company = relationship("Company", backref="users")
+    organization = relationship("Organization", backref="users")

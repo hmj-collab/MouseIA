@@ -12,8 +12,8 @@ class AssetService:
     def _repository(self) -> AssetRepository:
         return AssetRepository(self.db)
 
-    def list_assets(self, company_id: Optional[int] = None, site_id: Optional[int] = None) -> list[AssetOut]:
-        assets = self._repository().list_assets(company_id=company_id, site_id=site_id)
+    def list_assets(self, organization_id: Optional[int] = None, project_id: Optional[int] = None) -> list[AssetOut]:
+        assets = self._repository().list_assets(organization_id=organization_id, project_id=project_id)
         return [self._to_out(asset) for asset in assets]
 
     def get_asset(self, asset_id: int) -> Optional[AssetOut]:
@@ -37,6 +37,49 @@ class AssetService:
         asset = self._repository().get_by_id(asset_id)
         if asset is None:
             return False
+
+        # 1. Delete all Scans associated with the Asset
+        from app.models.scan import Scan
+        scans = self.db.query(Scan).filter(Scan.asset_id == asset_id).all()
+        for scan in scans:
+            self.db.delete(scan)
+
+        # 1.5 Delete all Signals associated with the Asset
+        from app.models.signal import Signal
+        signals = self.db.query(Signal).filter(Signal.asset_id == asset_id).all()
+        for sig in signals:
+            self.db.delete(sig)
+
+        # 2. Delete all Vulnerabilities, Recommendations, Tasks, Findings
+        from app.models.vulnerability import Vulnerability
+        from app.models.recommendation import Recommendation
+        from app.models.task import Task
+        from app.models.finding import Finding
+
+        vulns = self.db.query(Vulnerability).filter(Vulnerability.asset_id == asset_id).all()
+        for vuln in vulns:
+            # Delete Tasks linked to Recommendations of this Vulnerability
+            recs = self.db.query(Recommendation).filter(Recommendation.vulnerability_id == vuln.id).all()
+            for rec in recs:
+                tasks = self.db.query(Task).filter(Task.recommendation_id == rec.id).all()
+                for task in tasks:
+                    self.db.delete(task)
+                self.db.delete(rec)
+
+            finding_id = vuln.finding_id
+            self.db.delete(vuln)
+
+            if finding_id:
+                finding = self.db.query(Finding).filter(Finding.id == finding_id).first()
+                if finding:
+                    signal_id = finding.signal_id
+                    self.db.delete(finding)
+                    if signal_id:
+                        signal = self.db.query(Signal).filter(Signal.id == signal_id).first()
+                        if signal:
+                            self.db.delete(signal)
+
+        # 3. Delete the Asset itself
         self._repository().delete(asset)
         return True
 

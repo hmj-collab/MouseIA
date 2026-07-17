@@ -15,4 +15,4 @@ class Finding(Base, TimestampMixin):
     status = Column(String(40), nullable=False, default="open")
     signal_id = Column(Integer, ForeignKey("signals.id"), nullable=True)
 
-    signal = relationship("Signal", backref="findings")
+    signal = relationship("Signal", foreign_keys=[signal_id], backref="findings_legacy")
