@@ -74,4 +74,18 @@ def launch_scan(
     scan = ScanService(db).execute_scan(scan_id)
     if scan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Varredura não encontrada.")
+    try:
+        from app.models.user import User
+        from app.services.audit_service import AuditService
+        db_user = db.query(User).filter(User.username == user["username"]).first()
+        AuditService(db).log_action(
+            user_id=db_user.id if db_user else None,
+            action="LAUNCH_SCAN",
+            target_type="scan",
+            target_id=scan.id,
+            details={"scan_type": scan.scan_type, "project_id": scan.project_id}
+        )
+    except Exception:
+        pass
     return scan
+

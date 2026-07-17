@@ -15,6 +15,14 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
     # Tenta autenticar pelo banco primeiro
     db_user = UserService(db).authenticate(payload.username, payload.password)
     if db_user is not None:
+        from app.services.audit_service import AuditService
+        AuditService(db).log_action(
+            user_id=db_user.id,
+            action="LOGIN",
+            target_type="user",
+            target_id=db_user.id,
+            details={"username": db_user.username, "role": db_user.role}
+        )
         return TokenResponse(access_token=create_access_token(db_user.username, db_user.role))
 
     # Fallback: usuários hardcodados (transição / testes)
@@ -22,7 +30,21 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
     if fallback is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas.")
 
+    from app.models.user import User
+    found_user = db.query(User).filter(User.username == fallback["username"]).first()
+    found_user_id = found_user.id if found_user else None
+
+    from app.services.audit_service import AuditService
+    AuditService(db).log_action(
+        user_id=found_user_id,
+        action="LOGIN",
+        target_type="user",
+        target_id=found_user_id,
+        details={"username": fallback["username"], "role": fallback["role"], "method": "fallback"}
+    )
+
     return TokenResponse(access_token=create_access_token(fallback["username"], fallback["role"]))
+
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)

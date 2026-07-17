@@ -16,7 +16,21 @@ def list_projects(db: Session = Depends(get_db), user: dict[str, str] = Depends(
 
 @router.post("", response_model=ProjectOut, status_code=status.HTTP_201_CREATED)
 def create_project(payload: ProjectCreate, db: Session = Depends(get_db), user: dict[str, str] = Depends(require_role("admin"))) -> ProjectOut:
-    return ProjectService(db).create_project(payload)
+    project = ProjectService(db).create_project(payload)
+    try:
+        from app.models.user import User
+        from app.services.audit_service import AuditService
+        db_user = db.query(User).filter(User.username == user["username"]).first()
+        AuditService(db).log_action(
+            user_id=db_user.id if db_user else None,
+            action="CREATE_PROJECT",
+            target_type="project",
+            target_id=project.id,
+            details={"name": project.name, "url": project.url}
+        )
+    except Exception:
+        pass
+    return project
 
 
 @router.get("/{project_id}", response_model=ProjectOut)
@@ -32,6 +46,19 @@ def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depend
     project = ProjectService(db).update_project(project_id, payload)
     if project is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    try:
+        from app.models.user import User
+        from app.services.audit_service import AuditService
+        db_user = db.query(User).filter(User.username == user["username"]).first()
+        AuditService(db).log_action(
+            user_id=db_user.id if db_user else None,
+            action="UPDATE_PROJECT",
+            target_type="project",
+            target_id=project.id,
+            details={"name": project.name, "url": project.url}
+        )
+    except Exception:
+        pass
     return project
 
 
@@ -40,3 +67,16 @@ def delete_project(project_id: int, db: Session = Depends(get_db), user: dict[st
     deleted = ProjectService(db).delete_project(project_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    try:
+        from app.models.user import User
+        from app.services.audit_service import AuditService
+        db_user = db.query(User).filter(User.username == user["username"]).first()
+        AuditService(db).log_action(
+            user_id=db_user.id if db_user else None,
+            action="DELETE_PROJECT",
+            target_type="project",
+            target_id=project_id
+        )
+    except Exception:
+        pass
+

@@ -54,6 +54,19 @@ def update_vulnerability(
     vuln = VulnerabilityService(db).update_vulnerability(vulnerability_id, payload)
     if vuln is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vulnerabilidade não encontrada")
+    try:
+        from app.models.user import User
+        from app.services.audit_service import AuditService
+        db_user = db.query(User).filter(User.username == user["username"]).first()
+        AuditService(db).log_action(
+            user_id=db_user.id if db_user else None,
+            action="UPDATE_VULNERABILITY",
+            target_type="vulnerability",
+            target_id=vuln.id,
+            details={"status": vuln.status, "severity": vuln.severity}
+        )
+    except Exception:
+        pass
     return vuln
 
 
@@ -66,6 +79,19 @@ def delete_vulnerability(
     deleted = VulnerabilityService(db).delete_vulnerability(vulnerability_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vulnerabilidade não encontrada")
+    try:
+        from app.models.user import User
+        from app.services.audit_service import AuditService
+        db_user = db.query(User).filter(User.username == user["username"]).first()
+        AuditService(db).log_action(
+            user_id=db_user.id if db_user else None,
+            action="DELETE_VULNERABILITY",
+            target_type="vulnerability",
+            target_id=vulnerability_id
+        )
+    except Exception:
+        pass
+
 
 
 @router.post("/{vulnerability_id}/ai-analysis")
