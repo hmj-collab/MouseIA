@@ -47,7 +47,11 @@ class ScannerOrchestrator:
                 provider_signals = provider.scan(target_url, log_callback)
                 signals.extend(provider_signals)
                 log_callback("SUCCESS", f"Scanner {provider.name} finalizado. Encontrados {len(provider_signals)} sinais.")
+                for sig in provider_signals:
+                    severity_label = sig.get("severity", "info").upper()
+                    log_callback("INFO", f"  -> [{severity_label}] {sig.get('desc')}")
             except Exception as e:
                 log_callback("ERROR", f"Falha na varredura do provedor {provider.name}: {str(e)}")
+
 
         return signals
