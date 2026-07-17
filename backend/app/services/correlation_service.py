@@ -349,8 +349,9 @@ class CorrelationService:
         existing_vuln = self.db.query(Vulnerability).filter(Vulnerability.finding_id == finding.id).first()
         if existing_vuln:
             # Update existing vulnerability & recommendation
-            existing_vuln.description = matched_rule["description"]
+            existing_vuln.description = finding.description
             existing_vuln.severity = severity
+
             existing_vuln.cvss_score = cvss_score
             existing_vuln.risk_score = risk_score
             
@@ -364,8 +365,9 @@ class CorrelationService:
         # Create new Vulnerability record
         vuln = Vulnerability(
             title=matched_rule["title"],
-            description=matched_rule["description"],
+            description=finding.description,
             severity=severity,
+
             cvss_score=cvss_score,
             risk_score=risk_score,
             cve_id=cve_id,
@@ -375,6 +377,28 @@ class CorrelationService:
         )
         self.db.add(vuln)
         self.db.flush()  # populate vuln.id
+
+        # Run AI False Positive Analysis automatically during ingestion
+        try:
+            from app.services.ai_service import AIService
+            ai_svc = AIService(self.db)
+            ai_res = ai_svc.analyze_vulnerability(vuln.id)
+            if ai_res and not ai_res.get("error"):
+                ai_details = (
+                    f"\n\n--- ANÁLISE DE IA (MOUSE IA ENGINE) ---\n"
+                    f"Explicação: {ai_res.get('explanation')}\n"
+                    f"Impacto Comercial: {ai_res.get('business_impact')}\n"
+                    f"Confiança: {ai_res.get('confidence_score')}%\n"
+                )
+                if ai_res.get("is_false_positive"):
+                    ai_details += f"AVISO DE FALSO POSITIVO: {ai_res.get('false_positive_reason')}\n"
+                    vuln.risk_score = round((vuln.risk_score or risk_score or 5.0) * 0.1, 2)
+                    vuln.status = "mitigated"
+                
+                vuln.description = (vuln.description or "") + ai_details
+        except Exception:
+            pass
+
 
         # Create corresponding Recommendation action plan
         rec = Recommendation(

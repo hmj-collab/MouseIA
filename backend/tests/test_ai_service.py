@@ -69,3 +69,53 @@ def test_ai_analysis_endpoint() -> None:
     assert "remediation_steps" in ai_data
     assert ai_data["confidence_score"] > 0
     assert "is_false_positive" in ai_data
+
+
+def test_automated_false_positive_ingestion(db_session) -> None:
+    # 1. Create a test asset
+    from app.models.asset import Asset
+    from app.models.vulnerability import Vulnerability
+    from app.services.correlation_service import CorrelationService
+    
+    asset = Asset(
+        name="FP Test Asset",
+        asset_type="url",
+        value="http://fp-test.local",
+        description="Asset for testing false positive reduction",
+        is_active=True,
+    )
+    db_session.add(asset)
+    db_session.commit()
+    db_session.refresh(asset)
+
+    correlation_svc = CorrelationService(db_session)
+
+    # 2. Process signals designed to trigger false positive (contains 'false_positive')
+    signals_batch = [
+        {"type": "missing_csp", "severity": "medium", "confidence": 90, "desc": "Simulated false_positive trigger evidence"},
+    ]
+
+    findings = correlation_svc.process_new_signals(
+        signals_data=signals_batch,
+        asset_id=asset.id,
+        source="scan-fp"
+    )
+
+    assert len(findings) == 1
+    finding = findings[0]
+
+    # 3. Retrieve vulnerability and check the effects of false positive detection
+    vuln = db_session.query(Vulnerability).filter(Vulnerability.finding_id == finding.id).first()
+    assert vuln is not None
+    
+    # Assert status is automatically set to mitigated
+    assert vuln.status == "mitigated"
+    
+    # Assert description contains the AI Analysis section
+    assert "--- ANÁLISE DE IA (MOUSE IA ENGINE) ---" in vuln.description
+    assert "AVISO DE FALSO POSITIVO" in vuln.description
+
+    # Assert risk score is reduced by 0.1 multiplier
+    assert vuln.risk_score is not None
+    assert vuln.risk_score < 1.5
+

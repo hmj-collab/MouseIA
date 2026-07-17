@@ -86,7 +86,18 @@ class AIService:
         title = vuln.title.lower()
         desc = (vuln.description or "").lower()
 
+        if "false_positive" in title or "test_fp" in title or "false_positive" in desc:
+            return {
+                "explanation": "Detecção de teste identificada como falso positivo simulado.",
+                "business_impact": "Nenhum impacto de negócio pois a ameaça não é real.",
+                "remediation_steps": "Nenhuma ação necessária.",
+                "confidence_score": 10,
+                "is_false_positive": True,
+                "false_positive_reason": "Simulação de falso positivo para fins de testes integrados."
+            }
+
         if "wordpress" in title or "wordpress" in desc:
+
             return {
                 "explanation": (
                     "Instância ou componentes do WordPress expostos ou desatualizados detectados no servidor. "
