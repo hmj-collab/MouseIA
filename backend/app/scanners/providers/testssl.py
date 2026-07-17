@@ -22,7 +22,7 @@ class TestSSLProvider(BaseProvider):
             return True
         return shutil.which("testssl.sh") is not None or shutil.which("testssl") is not None
 
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
         
         local_exe = self._local_path()
@@ -45,7 +45,10 @@ class TestSSLProvider(BaseProvider):
         try:
             cmd = [executable, "--jsonfile", temp_path, target_url]
 
-            subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            if result.returncode != 0:
+                log_callback("ERROR", f"Falha na execução do testssl.sh (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
+
 
             if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:
                 with open(temp_path, "r", encoding="utf-8") as f:

@@ -22,7 +22,7 @@ class NucleiProvider(BaseProvider):
             return True
         return shutil.which("nuclei") is not None
 
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
         if not self.is_available():
             return signals
@@ -40,7 +40,12 @@ class NucleiProvider(BaseProvider):
                 cmd = [local_exe, "-target", target_url, "-json-export", temp_path, "-silent"]
             else:
                 cmd = ["nuclei", "-target", target_url, "-json-export", temp_path, "-silent"]
-            subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            if result.returncode != 0:
+                log_callback("ERROR", f"Falha na execução do Nuclei (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
+                return signals
+
 
 
             if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:

@@ -22,7 +22,7 @@ class WhatWebProvider(BaseProvider):
             return True
         return shutil.which("whatweb") is not None
 
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
         if not self.is_available():
             return signals
@@ -41,7 +41,9 @@ class WhatWebProvider(BaseProvider):
             
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
             if result.returncode != 0 or not result.stdout:
+                log_callback("ERROR", f"Falha na execução do WhatWeb (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
                 return signals
+
 
 
             data = json.loads(result.stdout)

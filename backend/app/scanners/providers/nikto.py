@@ -22,7 +22,7 @@ class NiktoProvider(BaseProvider):
             return True
         return shutil.which("nikto") is not None
 
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
         if not self.is_available():
             return signals
@@ -40,7 +40,12 @@ class NiktoProvider(BaseProvider):
                 cmd = ["perl", local_exe, "-h", target_url, "-Format", "json", "-o", temp_path]
             else:
                 cmd = ["nikto", "-h", target_url, "-Format", "json", "-o", temp_path]
-            subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            if result.returncode != 0:
+                log_callback("ERROR", f"Falha na execução do Nikto (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
+                return signals
+
 
 
             if os.path.exists(temp_path) and os.path.getsize(temp_path) > 0:

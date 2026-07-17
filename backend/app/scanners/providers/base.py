@@ -15,6 +15,7 @@ class BaseProvider(ABC):
         pass
 
     @abstractmethod
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         """Executes the scanner and returns a list of raw signals to be created."""
         pass
+

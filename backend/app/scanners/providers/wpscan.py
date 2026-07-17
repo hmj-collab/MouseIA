@@ -22,7 +22,7 @@ class WPScanProvider(BaseProvider):
             return True
         return shutil.which("wpscan") is not None
 
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
         if not self.is_available():
             return signals
@@ -58,9 +58,11 @@ class WPScanProvider(BaseProvider):
 
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             if result.returncode not in (0, 5):  # 5 is returned by wpscan when vulnerabilities are found
+                log_callback("ERROR", f"Falha na execução do WPScan (Código: {result.returncode}). Stderr: {result.stderr.strip()[:300]}")
                 return signals
 
             data = json.loads(result.stdout)
+
             
             # 1. WordPress Core vulnerabilities
             version_info = data.get("version", {})

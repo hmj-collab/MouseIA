@@ -12,7 +12,7 @@ class SecurityHeadersProvider(BaseProvider):
     def is_available(self) -> bool:
         return True  # Natively implemented in Python, always available!
 
-    def scan(self, target_url: str) -> List[Dict[str, Any]]:
+    def scan(self, target_url: str, log_callback) -> List[Dict[str, Any]]:
         signals = []
         try:
             with httpx.Client(timeout=3.0, follow_redirects=True) as client:

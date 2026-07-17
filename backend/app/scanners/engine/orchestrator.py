@@ -44,7 +44,7 @@ class ScannerOrchestrator:
 
             log_callback("INFO", f"Executando varredura com: {provider.name}...")
             try:
-                provider_signals = provider.scan(target_url)
+                provider_signals = provider.scan(target_url, log_callback)
                 signals.extend(provider_signals)
                 log_callback("SUCCESS", f"Scanner {provider.name} finalizado. Encontrados {len(provider_signals)} sinais.")
             except Exception as e:
