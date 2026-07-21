@@ -44,3 +44,33 @@ def test_audit_logging_flow(db_session: Session) -> None:
     assert project_audit is not None
     assert project_audit.target_type == "project"
     assert "Audit Test Project" in project_audit.details
+
+
+def test_audit_logs_api(db_session: Session) -> None:
+    client = TestClient(app)
+    # Login as admin
+    login_resp = client.post("/auth/login", json={"username": "admin", "password": "password123"})
+    assert login_resp.status_code == 200
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Fetch Audit Logs
+    get_resp = client.get("/audit-logs", headers=headers)
+    assert get_resp.status_code == 200
+    logs = get_resp.json()
+    assert len(logs) > 0
+    assert any(log["action"] == "LOGIN" for log in logs)
+
+    # 2. Test Filters
+    filter_resp = client.get("/audit-logs?action=LOGIN", headers=headers)
+    assert filter_resp.status_code == 200
+    for log in filter_resp.json():
+        assert "LOGIN" in log["action"]
+
+    # 3. Test RBAC: Verify viewer cannot access
+    viewer_login = client.post("/auth/login", json={"username": "viewer", "password": "password123"})
+    assert viewer_login.status_code == 200
+    viewer_token = viewer_login.json()["access_token"]
+    viewer_headers = {"Authorization": f"Bearer {viewer_token}"}
+    
+    assert client.get("/audit-logs", headers=viewer_headers).status_code == 403

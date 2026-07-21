@@ -14,6 +14,8 @@ from app.api.users import router as users_router
 from app.api.vulnerabilities import router as vulnerabilities_router
 from app.api.recommendations import router as recommendations_router
 from app.api.dashboard import router as dashboard_router
+from app.api.webhooks import router as webhooks_router
+from app.api.audit_logs import router as audit_logs_router
 from app.core.security import get_current_user
 from app.core.settings import settings
 from app.database.session import Base, engine
@@ -54,6 +56,8 @@ app.include_router(scans_router)
 app.include_router(vulnerabilities_router)
 app.include_router(recommendations_router)
 app.include_router(dashboard_router)
+app.include_router(webhooks_router)
+app.include_router(audit_logs_router)
 
 
 

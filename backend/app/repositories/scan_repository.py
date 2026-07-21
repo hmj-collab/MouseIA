@@ -8,16 +8,23 @@ class ScanRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def list_scans(self, project_id: Optional[int] = None, asset_id: Optional[int] = None) -> list[Scan]:
+    def list_scans(self, project_id: Optional[int] = None, asset_id: Optional[int] = None, organization_id: Optional[int] = None) -> list[Scan]:
         q = self.db.query(Scan)
         if project_id is not None:
             q = q.filter(Scan.project_id == project_id)
         if asset_id is not None:
             q = q.filter(Scan.asset_id == asset_id)
+        if organization_id is not None:
+            from app.models.project import Project
+            q = q.join(Project, Project.id == Scan.project_id).filter(Project.organization_id == organization_id)
         return q.order_by(Scan.id.desc()).all()
 
-    def get_by_id(self, scan_id: int) -> Optional[Scan]:
-        return self.db.query(Scan).filter(Scan.id == scan_id).first()
+    def get_by_id(self, scan_id: int, organization_id: Optional[int] = None) -> Optional[Scan]:
+        q = self.db.query(Scan).filter(Scan.id == scan_id)
+        if organization_id is not None:
+            from app.models.project import Project
+            q = q.join(Project, Project.id == Scan.project_id).filter(Project.organization_id == organization_id)
+        return q.first()
 
     def create(self, payload: ScanCreate) -> Scan:
         scan = Scan(

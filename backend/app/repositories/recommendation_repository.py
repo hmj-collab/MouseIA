@@ -9,14 +9,27 @@ class RecommendationRepository:
     def __init__(self, db: Session) -> None:
         self.db = db
 
-    def list_recommendations(self, vulnerability_id: Optional[int] = None) -> list[Recommendation]:
+    def list_recommendations(self, vulnerability_id: Optional[int] = None, organization_id: Optional[int] = None) -> list[Recommendation]:
         query = self.db.query(Recommendation)
         if vulnerability_id is not None:
             query = query.filter(Recommendation.vulnerability_id == vulnerability_id)
+        if organization_id is not None:
+            from app.models.vulnerability import Vulnerability
+            from app.models.asset import Asset
+            query = query.join(Vulnerability, Vulnerability.id == Recommendation.vulnerability_id) \
+                         .join(Asset, Asset.id == Vulnerability.asset_id) \
+                         .filter(Asset.organization_id == organization_id)
         return query.order_by(Recommendation.id.desc()).all()
 
-    def get_by_id(self, recommendation_id: int) -> Optional[Recommendation]:
-        return self.db.query(Recommendation).filter(Recommendation.id == recommendation_id).first()
+    def get_by_id(self, recommendation_id: int, organization_id: Optional[int] = None) -> Optional[Recommendation]:
+        query = self.db.query(Recommendation).filter(Recommendation.id == recommendation_id)
+        if organization_id is not None:
+            from app.models.vulnerability import Vulnerability
+            from app.models.asset import Asset
+            query = query.join(Vulnerability, Vulnerability.id == Recommendation.vulnerability_id) \
+                         .join(Asset, Asset.id == Vulnerability.asset_id) \
+                         .filter(Asset.organization_id == organization_id)
+        return query.first()
 
     def create(self, payload: RecommendationCreate) -> Recommendation:
         rec = Recommendation(

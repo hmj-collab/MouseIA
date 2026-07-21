@@ -18,8 +18,11 @@ class AssetRepository:
             q = q.filter(Asset.project_id == project_id)
         return q.order_by(Asset.id).all()
 
-    def get_by_id(self, asset_id: int) -> Optional[Asset]:
-        return self.db.query(Asset).filter(Asset.id == asset_id).first()
+    def get_by_id(self, asset_id: int, organization_id: Optional[int] = None) -> Optional[Asset]:
+        q = self.db.query(Asset).filter(Asset.id == asset_id)
+        if organization_id is not None:
+            q = q.filter(Asset.organization_id == organization_id)
+        return q.first()
 
     def create(self, payload: AssetCreate) -> Asset:
         asset = Asset(**payload.model_dump())

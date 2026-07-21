@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, LayoutDashboard, Globe, Shield, Database, 
-  LogOut, User as UserIcon, Activity
+  LogOut, User as UserIcon, Activity, Settings as SettingsIcon
 } from 'lucide-react';
 
 import api from './services/api';
@@ -11,6 +11,7 @@ import Projects from './components/Projects';
 import Scans from './components/Scans';
 import SignalsFindings from './components/SignalsFindings';
 import Vulnerabilities from './components/Vulnerabilities';
+import Settings from './components/Settings';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -94,7 +95,7 @@ function App() {
             className={`nav-item ${currentTab === 'signals' ? 'active' : ''}`}
             onClick={() => setCurrentTab('signals')}
           >
-            <Database size={16} /> Ameaças
+            <Database size={16} /> Sinais e Achados
           </button>
           <button 
             className={`nav-item ${currentTab === 'vulnerabilities' ? 'active' : ''}`}
@@ -102,6 +103,14 @@ function App() {
           >
             <ShieldAlert size={16} /> Vulnerabilidades
           </button>
+          {user && user.role === 'admin' && (
+            <button 
+              className={`nav-item ${currentTab === 'settings' ? 'active' : ''}`}
+              onClick={() => setCurrentTab('settings')}
+            >
+              <SettingsIcon size={16} /> Configurações
+            </button>
+          )}
         </nav>
 
         {/* User context menu */}
@@ -140,6 +149,9 @@ function App() {
         )}
         {currentTab === 'vulnerabilities' && (
           <Vulnerabilities user={user} />
+        )}
+        {currentTab === 'settings' && (
+          <Settings user={user} />
         )}
       </main>
 

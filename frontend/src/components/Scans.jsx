@@ -21,7 +21,7 @@ export default function Scans({ user }) {
   const [assetForm, setAssetForm] = useState({ id: null, name: '', asset_type: 'url', value: '', description: '', organization_id: '', project_id: '' });
 
   const [showScanModal, setShowScanModal] = useState(false);
-  const [scanForm, setScanForm] = useState({ id: null, scan_type: 'wordpress', description: '', asset_id: '', project_id: '' });
+  const [scanForm, setScanForm] = useState({ id: null, scan_type: 'todos', description: '', asset_id: '', project_id: '' });
   const [selectedScanLogs, setSelectedScanLogs] = useState(null);
 
   const [activeTab, setActiveTab] = useState('scans'); // 'scans' or 'assets'
@@ -172,7 +172,7 @@ export default function Scans({ user }) {
         {isAdmin && (
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <button className="primary" onClick={() => {
-              setScanForm({ id: null, scan_type: 'wordpress', description: '', asset_id: '', project_id: '' });
+              setScanForm({ id: null, scan_type: 'todos', description: '', asset_id: '', project_id: '' });
               setShowScanModal(true);
             }}>
               <Play size={18} style={{ transform: 'rotate(0deg)' }} /> Executar Novo Scan
@@ -278,7 +278,7 @@ export default function Scans({ user }) {
                           </span>
                         </td>
                         <td style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          {scan.started_at ? new Date(scan.started_at).toLocaleString() : <span style={{ color: 'var(--text-muted)' }}>Pendente</span>}
+                          {scan.started_at ? api.formatDate(scan.started_at) : <span style={{ color: 'var(--text-muted)' }}>Pendente</span>}
                         </td>
                         <td>
                           {scan.description ? (
@@ -519,10 +519,13 @@ export default function Scans({ user }) {
                   value={scanForm.scan_type}
                   onChange={(e) => setScanForm({ ...scanForm, scan_type: e.target.value })}
                 >
-                  <option value="wordpress">WordPress Analysis (Security Headers & WP Version)</option>
+                  <option value="todos">TODOS (Executar todos os Scanners)</option>
+                  <option value="wordpress">WordPress Analysis (WPScan & WhatWeb)</option>
                   <option value="headers">HTTP Security Headers Check</option>
-                  <option value="port-scan">Port Scanning (Basic)</option>
-                  <option value="tls-ssl">TLS/SSL Configuration Check</option>
+                  <option value="port-scan">Nmap Port Scanner</option>
+                  <option value="tls-ssl">TestSSL (TLS/SSL Check)</option>
+                  <option value="nuclei">Nuclei Vulnerability Scanner</option>
+                  <option value="nikto">Nikto Web Server Scanner</option>
                 </select>
               </div>
 
@@ -619,9 +622,19 @@ export default function Scans({ user }) {
                 else if (line.includes('[SUCCESS]')) color = '#34d399'; // emerald-400
                 else if (line.includes('[INFO]')) color = '#60a5fa'; // blue-400
 
+                let displayLine = line;
+                const timestampRegex = /^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\]/;
+                const match = line.match(timestampRegex);
+                if (match) {
+                  const utcDateStr = match[1].replace(' ', 'T') + 'Z';
+                  const formattedDate = api.formatDate(utcDateStr);
+                  const remaining = line.substring(match[0].length);
+                  displayLine = `[${formattedDate}]${remaining}`;
+                }
+
                 return (
                   <div key={idx} style={{ color, whiteSpace: 'pre-wrap' }}>
-                    {line}
+                    {displayLine}
                   </div>
                 );
               })}

@@ -20,29 +20,51 @@ class ScanService:
     def _repository(self) -> ScanRepository:
         return ScanRepository(self.db)
 
-    def list_scans(self, project_id: Optional[int] = None, asset_id: Optional[int] = None) -> list[ScanOut]:
-        scans = self._repository().list_scans(project_id=project_id, asset_id=asset_id)
+    def list_scans(self, project_id: Optional[int] = None, asset_id: Optional[int] = None, organization_id: Optional[int] = None) -> list[ScanOut]:
+        scans = self._repository().list_scans(project_id=project_id, asset_id=asset_id, organization_id=organization_id)
         return [self._to_out(scan) for scan in scans]
 
-    def get_scan(self, scan_id: int) -> Optional[ScanOut]:
-        scan = self._repository().get_by_id(scan_id)
+    def get_scan(self, scan_id: int, organization_id: Optional[int] = None) -> Optional[ScanOut]:
+        scan = self._repository().get_by_id(scan_id, organization_id)
         if scan is None:
             return None
         return self._to_out(scan)
 
-    def create_scan(self, payload: ScanCreate) -> ScanOut:
+    def create_scan(self, payload: ScanCreate, organization_id: Optional[int] = None) -> ScanOut:
+        if organization_id is not None:
+            if payload.project_id:
+                from app.models.project import Project
+                proj = self.db.query(Project).filter(Project.id == payload.project_id).first()
+                if proj and proj.organization_id != organization_id:
+                    raise ValueError("O projeto informado não pertence à sua organização.")
+            if payload.asset_id:
+                from app.models.asset import Asset
+                asset = self.db.query(Asset).filter(Asset.id == payload.asset_id).first()
+                if asset and asset.organization_id != organization_id:
+                    raise ValueError("O ativo informado não pertence à sua organização.")
         scan = self._repository().create(payload)
         return self._to_out(scan)
 
-    def update_scan(self, scan_id: int, payload: ScanUpdate) -> Optional[ScanOut]:
-        scan = self._repository().get_by_id(scan_id)
+    def update_scan(self, scan_id: int, payload: ScanUpdate, organization_id: Optional[int] = None) -> Optional[ScanOut]:
+        scan = self._repository().get_by_id(scan_id, organization_id)
         if scan is None:
             return None
+        if organization_id is not None:
+            if payload.project_id:
+                from app.models.project import Project
+                proj = self.db.query(Project).filter(Project.id == payload.project_id).first()
+                if proj and proj.organization_id != organization_id:
+                    raise ValueError("O projeto informado não pertence à sua organização.")
+            if payload.asset_id:
+                from app.models.asset import Asset
+                asset = self.db.query(Asset).filter(Asset.id == payload.asset_id).first()
+                if asset and asset.organization_id != organization_id:
+                    raise ValueError("O ativo informado não pertence à sua organização.")
         updated = self._repository().update(scan, payload)
         return self._to_out(updated)
 
-    def delete_scan(self, scan_id: int) -> bool:
-        scan = self._repository().get_by_id(scan_id)
+    def delete_scan(self, scan_id: int, organization_id: Optional[int] = None) -> bool:
+        scan = self._repository().get_by_id(scan_id, organization_id)
         if scan is None:
             return False
         self._repository().delete(scan)
@@ -50,8 +72,8 @@ class ScanService:
 
 
 
-    def execute_scan(self, scan_id: int) -> Optional[ScanOut]:
-        scan = self._repository().get_by_id(scan_id)
+    def execute_scan(self, scan_id: int, organization_id: Optional[int] = None) -> Optional[ScanOut]:
+        scan = self._repository().get_by_id(scan_id, organization_id)
         if scan is None:
             return None
 
@@ -114,26 +136,80 @@ class ScanService:
                 log("WARNING", "Nenhum sinal gerado pelos scanners ativos. Ativando Sandbox (Offline Fallback)...")
                 log("INFO", "[Sandbox] Resolvendo host fictício via Sandbox DNS...")
                 log("INFO", f"[Sandbox] Simulando GET request para {target_url}...")
-                log("INFO", "[Sandbox] Analisando cabeçalhos HTTP fictícios...")
-                log("WARNING", "[Sandbox] CSP (Content-Security-Policy) ausente no cabeçalho simulado.")
-                log("INFO", "[Sandbox] Pesquisando assinaturas do WordPress...")
-                log("WARNING", "[Sandbox] Assinatura do WordPress detectada via Heurística de metatags.")
-                log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
 
-                signals_to_create.extend([
-                    {
-                        "type": "missing_csp",
-                        "severity": "medium",
-                        "confidence": 95,
-                        "desc": "Header de segurança 'Content-Security-Policy' (CSP) ausente (Mocked)."
-                    },
-                    {
+                stype = (scan.scan_type or "todos").lower()
+                if stype in ("todos", "all"):
+                    log("INFO", "[Sandbox] Executando simulação completa de todos os testes...")
+                    log("WARNING", "[Sandbox] CSP (Content-Security-Policy) ausente no cabeçalho simulado.")
+                    log("WARNING", "[Sandbox] Assinatura do WordPress detectada via Heurística de metatags.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
+                    signals_to_create.extend([
+                        {
+                            "type": "missing_csp",
+                            "severity": "medium",
+                            "confidence": 95,
+                            "desc": "Header de segurança 'Content-Security-Policy' (CSP) ausente (Mocked)."
+                        },
+                        {
+                            "type": "wordpress_detected",
+                            "severity": "info",
+                            "confidence": 100,
+                            "desc": "Assinatura do WordPress detectada no código HTML (Mocked)."
+                        }
+                    ])
+                elif stype == "wordpress":
+                    log("INFO", "[Sandbox] Executando simulação de análise do WordPress...")
+                    log("WARNING", "[Sandbox] Assinatura do WordPress detectada via Heurística de metatags.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
+                    signals_to_create.append({
                         "type": "wordpress_detected",
                         "severity": "info",
                         "confidence": 100,
                         "desc": "Assinatura do WordPress detectada no código HTML (Mocked)."
-                    }
-                ])
+                    })
+                elif stype == "headers":
+                    log("INFO", "[Sandbox] Executando simulação de cabeçalhos HTTP...")
+                    log("WARNING", "[Sandbox] CSP (Content-Security-Policy) ausente no cabeçalho simulado.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
+                    signals_to_create.append({
+                        "type": "missing_csp",
+                        "severity": "medium",
+                        "confidence": 95,
+                        "desc": "Header de segurança 'Content-Security-Policy' (CSP) ausente (Mocked)."
+                    })
+                elif stype == "nikto":
+                    log("INFO", "[Sandbox] Executando simulação do Nikto...")
+                    log("WARNING", "[Sandbox] Arquivo sensível exposto detectado no servidor web.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
+                    signals_to_create.append({
+                        "type": "nikto_item",
+                        "severity": "medium",
+                        "confidence": 90,
+                        "desc": "Nikto: O arquivo /test.php foi encontrado contendo diretivas phpinfo() expostas (Mocked)."
+                    })
+                elif stype in ("port-scan", "nmap"):
+                    log("INFO", "[Sandbox] Executando simulação do Nmap...")
+                    log("WARNING", "[Sandbox] Porta SSH (22/tcp) aberta detectada.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
+                    signals_to_create.append({
+                        "type": "port_open_22",
+                        "severity": "low",
+                        "confidence": 100,
+                        "desc": "Nmap: Porta 22/tcp (SSH) aberta no alvo (Mocked)."
+                    })
+                elif stype in ("tls-ssl", "testssl"):
+                    log("INFO", "[Sandbox] Executando simulação de TLS/SSL...")
+                    log("WARNING", "[Sandbox] Protocolo TLS 1.0 habilitado no servidor.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
+                    signals_to_create.append({
+                        "type": "tls_legacy_protocol",
+                        "severity": "medium",
+                        "confidence": 95,
+                        "desc": "TestSSL: Protocolo obsoleto TLS 1.0 habilitado (Mocked)."
+                    })
+                else:
+                    log("WARNING", f"[Sandbox] Tipo de scan '{scan.scan_type}' desconhecido. Simulação básica executada.")
+                    log("SUCCESS", "[Sandbox] Varredura sandbox finalizada.")
         else:
             log("ERROR", "Nenhum alvo URL válido encontrado para o Scan. Concluindo sem varredura.")
 

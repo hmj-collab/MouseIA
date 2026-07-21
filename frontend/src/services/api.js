@@ -293,6 +293,42 @@ class ApiService {
     });
   }
 
+  // Webhooks Endpoints
+  async getWebhooks() {
+    return this.request('/webhooks');
+  }
+
+  async createWebhook(webhookData) {
+    return this.request('/webhooks', {
+      method: 'POST',
+      body: JSON.stringify(webhookData),
+    });
+  }
+
+  async updateWebhook(id, webhookData) {
+    return this.request(`/webhooks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(webhookData),
+    });
+  }
+
+  async deleteWebhook(id) {
+    return this.request(`/webhooks/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Audit Logs Endpoints
+  async getAuditLogs(userId = null, action = null, limit = 100, offset = 0) {
+    const params = [];
+    if (userId) params.push(`user_id=${userId}`);
+    if (action) params.push(`action=${action}`);
+    if (limit) params.push(`limit=${limit}`);
+    if (offset) params.push(`offset=${offset}`);
+    const query = params.length ? `?${params.join('&')}` : '';
+    return this.request(`/audit-logs${query}`);
+  }
+
   async getDashboardMetrics() {
     return this.request('/dashboard/metrics');
   }
@@ -320,6 +356,22 @@ class ApiService {
     document.body.appendChild(a);
     a.click();
     a.remove();
+  }
+
+  formatDate(dateString) {
+    if (!dateString) return '';
+    const timezone = localStorage.getItem('timezone') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    
+    let formattedString = dateString;
+    if (typeof dateString === 'string' && !dateString.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(dateString)) {
+      formattedString = dateString + 'Z';
+    }
+    
+    try {
+      return new Date(formattedString).toLocaleString('pt-BR', { timeZone: timezone });
+    } catch (e) {
+      return new Date(formattedString).toLocaleString();
+    }
   }
 }
 

@@ -16,25 +16,32 @@ class AssetService:
         assets = self._repository().list_assets(organization_id=organization_id, project_id=project_id)
         return [self._to_out(asset) for asset in assets]
 
-    def get_asset(self, asset_id: int) -> Optional[AssetOut]:
-        asset = self._repository().get_by_id(asset_id)
+    def get_asset(self, asset_id: int, organization_id: Optional[int] = None) -> Optional[AssetOut]:
+        asset = self._repository().get_by_id(asset_id, organization_id)
         if asset is None:
             return None
         return self._to_out(asset)
 
-    def create_asset(self, payload: AssetCreate) -> AssetOut:
+    def create_asset(self, payload: AssetCreate, organization_id: Optional[int] = None) -> AssetOut:
+        if organization_id is not None:
+            payload.organization_id = organization_id
+        if payload.project_id:
+            from app.models.project import Project
+            proj = self.db.query(Project).filter(Project.id == payload.project_id).first()
+            if proj and organization_id is not None and proj.organization_id != organization_id:
+                raise ValueError("O projeto informado não pertence à sua organização.")
         asset = self._repository().create(payload)
         return self._to_out(asset)
 
-    def update_asset(self, asset_id: int, payload: AssetUpdate) -> Optional[AssetOut]:
-        asset = self._repository().get_by_id(asset_id)
+    def update_asset(self, asset_id: int, payload: AssetUpdate, organization_id: Optional[int] = None) -> Optional[AssetOut]:
+        asset = self._repository().get_by_id(asset_id, organization_id)
         if asset is None:
             return None
         updated = self._repository().update(asset, payload)
         return self._to_out(updated)
 
-    def delete_asset(self, asset_id: int) -> bool:
-        asset = self._repository().get_by_id(asset_id)
+    def delete_asset(self, asset_id: int, organization_id: Optional[int] = None) -> bool:
+        asset = self._repository().get_by_id(asset_id, organization_id)
         if asset is None:
             return False
 

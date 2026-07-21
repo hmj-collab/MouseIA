@@ -13,8 +13,8 @@ class ProjectService:
     def _repository(self) -> ProjectRepository:
         return ProjectRepository(self.db)
 
-    def list_projects(self) -> list[ProjectOut]:
-        projects = self._repository().list_projects()
+    def list_projects(self, organization_id: Optional[int] = None) -> list[ProjectOut]:
+        projects = self._repository().list_projects(organization_id=organization_id)
         return [self._to_out(project) for project in projects]
 
     def create_project(self, payload: ProjectCreate) -> ProjectOut:
@@ -26,20 +26,21 @@ class ProjectService:
                 asset_type="web_application",
                 value=payload.url,
                 is_active=True,
-                project_id=project.id
+                project_id=project.id,
+                organization_id=project.organization_id
             )
             self.db.add(asset)
             self.db.commit()
         return self._to_out(project)
 
-    def get_project(self, project_id: int) -> Optional[ProjectOut]:
-        project = self._repository().get_project(project_id)
+    def get_project(self, project_id: int, organization_id: Optional[int] = None) -> Optional[ProjectOut]:
+        project = self._repository().get_project(project_id, organization_id)
         if project is None:
             return None
         return self._to_out(project)
 
-    def update_project(self, project_id: int, payload: ProjectUpdate) -> Optional[ProjectOut]:
-        project = self._repository().update_project(project_id, payload)
+    def update_project(self, project_id: int, payload: ProjectUpdate, organization_id: Optional[int] = None) -> Optional[ProjectOut]:
+        project = self._repository().update_project(project_id, payload, organization_id)
         if project is None:
             return None
         
@@ -57,15 +58,16 @@ class ProjectService:
                     asset_type="web_application",
                     value=payload.url,
                     is_active=True,
-                    project_id=project_id
+                    project_id=project_id,
+                    organization_id=project.organization_id
                 )
                 self.db.add(asset)
             self.db.commit()
 
         return self._to_out(project)
 
-    def delete_project(self, project_id: int) -> bool:
-        return self._repository().delete_project(project_id)
+    def delete_project(self, project_id: int, organization_id: Optional[int] = None) -> bool:
+        return self._repository().delete_project(project_id, organization_id)
 
     def _to_out(self, project: ProjectModel) -> ProjectOut:
         from app.models.asset import Asset as AssetModel

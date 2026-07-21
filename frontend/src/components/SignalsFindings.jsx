@@ -85,9 +85,9 @@ export default function SignalsFindings({ user }) {
     <div className="animate-fade-in" style={{ padding: '2rem 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
         <div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Análise de Ameaças</h1>
+          <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.25rem' }}>Análise de Sinais e Achados</h1>
           <p style={{ color: 'var(--text-secondary)' }}>
-            Consulte a lista detalhada de eventos de segurança detectados e achados estruturados.
+            Consulte a lista detalhada de sinais técnicos brutos e achados de correlação estruturados.
           </p>
         </div>
         <button className="secondary" onClick={loadData}>
@@ -104,7 +104,7 @@ export default function SignalsFindings({ user }) {
         {/* Severity filter */}
         <div style={{ minWidth: '150px' }}>
           <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)} style={{ padding: '0.45rem', fontSize: '0.8rem' }}>
-            <option value="">-- Severidade --</option>
+            <option value="">-- Severidade Técnica --</option>
             <option value="critical">Crítica</option>
             <option value="high">Alta</option>
             <option value="medium">Média</option>
@@ -132,21 +132,20 @@ export default function SignalsFindings({ user }) {
         )}
       </div>
 
-      {/* Navigation tabs */}
       <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border-color)', marginBottom: '1.5rem', paddingBottom: '1px' }}>
         <button
           className="nav-item"
           style={{ borderBottom: activeTab === 'findings' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('findings')}
         >
-          <ShieldAlert size={18} /> Achados / Findings ({filteredFindings.length})
+          <ShieldAlert size={18} /> Achados Correlacionados / Findings ({filteredFindings.length})
         </button>
         <button
           className="nav-item"
           style={{ borderBottom: activeTab === 'signals' ? '2px solid var(--color-primary)' : 'none', borderRadius: 0, paddingBottom: '0.75rem' }}
           onClick={() => setActiveTab('signals')}
         >
-          <Server size={18} /> Sinais Brutos / Signals ({filteredSignals.length})
+          <Server size={18} /> Sinais Técnicos / Signals ({filteredSignals.length})
         </button>
       </div>
 
@@ -164,7 +163,7 @@ export default function SignalsFindings({ user }) {
                   <tr>
                     <th>Título</th>
                     <th>Descrição</th>
-                    <th>Severidade</th>
+                    <th>Severidade Técnica</th>
                     <th>Status</th>
                     <th>Sinal Origem</th>
                     <th>Ações</th>

@@ -23,7 +23,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
             target_id=db_user.id,
             details={"username": db_user.username, "role": db_user.role}
         )
-        return TokenResponse(access_token=create_access_token(db_user.username, db_user.role))
+        return TokenResponse(access_token=create_access_token(db_user.username, db_user.role, db_user.organization_id))
 
     # Fallback: usuários hardcodados (transição / testes)
     fallback = authenticate_user(payload.username, payload.password)
@@ -33,6 +33,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
     from app.models.user import User
     found_user = db.query(User).filter(User.username == fallback["username"]).first()
     found_user_id = found_user.id if found_user else None
+    found_org_id = found_user.organization_id if found_user else None
 
     from app.services.audit_service import AuditService
     AuditService(db).log_action(
@@ -43,7 +44,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse
         details={"username": fallback["username"], "role": fallback["role"], "method": "fallback"}
     )
 
-    return TokenResponse(access_token=create_access_token(fallback["username"], fallback["role"]))
+    return TokenResponse(access_token=create_access_token(fallback["username"], fallback["role"], found_org_id))
 
 
 

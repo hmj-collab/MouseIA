@@ -187,7 +187,7 @@ export default function Dashboard({ user, onNavigate }) {
       </div>
 
       {/* Severities distribution row */}
-      <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Distribuição de Severidade</h3>
+      <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem' }}>Distribuição de Severidade do Risco</h3>
       <div className="grid-cols-5" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
         {severityData.map(item => {
           const count = stats.findingsBySeverity[item.key] || 0;
@@ -235,7 +235,7 @@ export default function Dashboard({ user, onNavigate }) {
                   <div>
                     <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>Tipo: {scan.scan_type.toUpperCase()}</div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Iniciado em: {scan.started_at ? new Date(scan.started_at).toLocaleString() : 'N/A'}
+                      Iniciado em: {scan.started_at ? api.formatDate(scan.started_at) : 'N/A'}
                     </div>
                   </div>
                   <span className={`badge ${scan.status === 'completed' ? 'success' : scan.status === 'running' ? 'info' : 'medium'}`}>

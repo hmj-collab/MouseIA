@@ -15,27 +15,43 @@ def list_scans(
     project_id: Optional[int] = None,
     asset_id: Optional[int] = None,
     db: Session = Depends(get_db),
-    user: dict[str, str] = Depends(require_role("admin", "viewer")),
+    user: dict[str, any] = Depends(require_role("admin", "viewer")),
 ) -> list[ScanOut]:
-    return ScanService(db).list_scans(project_id=project_id, asset_id=asset_id)
+    org_id = user.get("organization_id")
+    if org_id is not None:
+        # Validate requested project/asset scopes
+        if project_id is not None:
+            from app.models.project import Project
+            proj = db.query(Project).filter(Project.id == project_id).first()
+            if proj and proj.organization_id != org_id:
+                return []
+        if asset_id is not None:
+            from app.models.asset import Asset
+            asset = db.query(Asset).filter(Asset.id == asset_id).first()
+            if asset and asset.organization_id != org_id:
+                return []
+    return ScanService(db).list_scans(project_id=project_id, asset_id=asset_id, organization_id=org_id)
 
 
 @router.post("", response_model=ScanOut, status_code=status.HTTP_201_CREATED)
 def create_scan(
     payload: ScanCreate,
     db: Session = Depends(get_db),
-    user: dict[str, str] = Depends(require_role("admin")),
+    user: dict[str, any] = Depends(require_role("admin")),
 ) -> ScanOut:
-    return ScanService(db).create_scan(payload)
+    try:
+        return ScanService(db).create_scan(payload, organization_id=user.get("organization_id"))
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @router.get("/{scan_id}", response_model=ScanOut)
 def get_scan(
     scan_id: int,
     db: Session = Depends(get_db),
-    user: dict[str, str] = Depends(require_role("admin", "viewer")),
+    user: dict[str, any] = Depends(require_role("admin", "viewer")),
 ) -> ScanOut:
-    scan = ScanService(db).get_scan(scan_id)
+    scan = ScanService(db).get_scan(scan_id, organization_id=user.get("organization_id"))
     if scan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Varredura não encontrada.")
     return scan
@@ -46,21 +62,24 @@ def update_scan(
     scan_id: int,
     payload: ScanUpdate,
     db: Session = Depends(get_db),
-    user: dict[str, str] = Depends(require_role("admin")),
+    user: dict[str, any] = Depends(require_role("admin")),
 ) -> ScanOut:
-    updated = ScanService(db).update_scan(scan_id, payload)
-    if updated is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Varredura não encontrada.")
-    return updated
+    try:
+        updated = ScanService(db).update_scan(scan_id, payload, organization_id=user.get("organization_id"))
+        if updated is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Varredura não encontrada.")
+        return updated
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
 
 
 @router.delete("/{scan_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_scan(
     scan_id: int,
     db: Session = Depends(get_db),
-    user: dict[str, str] = Depends(require_role("admin")),
+    user: dict[str, any] = Depends(require_role("admin")),
 ) -> None:
-    deleted = ScanService(db).delete_scan(scan_id)
+    deleted = ScanService(db).delete_scan(scan_id, organization_id=user.get("organization_id"))
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Varredura não encontrada.")
 
@@ -69,9 +88,9 @@ def delete_scan(
 def launch_scan(
     scan_id: int,
     db: Session = Depends(get_db),
-    user: dict[str, str] = Depends(require_role("admin")),
+    user: dict[str, any] = Depends(require_role("admin")),
 ) -> ScanOut:
-    scan = ScanService(db).execute_scan(scan_id)
+    scan = ScanService(db).execute_scan(scan_id, organization_id=user.get("organization_id"))
     if scan is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Varredura não encontrada.")
     try:

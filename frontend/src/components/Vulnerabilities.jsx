@@ -67,8 +67,9 @@ export default function Vulnerabilities({ user }) {
   };
 
   const getPriorityColor = (prio) => {
-    const p = prio.toLowerCase();
-    if (p === 'critical' || p === 'high') return 'var(--color-danger)';
+    const p = (prio || '').toLowerCase();
+    if (p === 'critical') return 'var(--color-critical)';
+    if (p === 'high') return 'var(--color-danger)';
     if (p === 'medium') return 'var(--color-warning)';
     return 'var(--color-primary)';
   };
@@ -247,7 +248,7 @@ export default function Vulnerabilities({ user }) {
                     <th>Alvo (Ativo)</th>
                     <th>Score CVSS</th>
                     <th>Risk Score (IA)</th>
-                    <th>Severidade</th>
+                    <th>Severidade do Risco</th>
                     <th>Status</th>
                     <th>Ações</th>
                   </tr>
@@ -347,7 +348,14 @@ export default function Vulnerabilities({ user }) {
               </p>
             </div>
           ) : (
-            recommendations.map(rec => (
+            [...recommendations]
+              .sort((a, b) => {
+                const priorityWeight = { 'critical': 4, 'high': 3, 'medium': 2, 'low': 1, 'info': 0 };
+                const wA = priorityWeight[(a.priority || '').toLowerCase()] || 0;
+                const wB = priorityWeight[(b.priority || '').toLowerCase()] || 0;
+                return wB - wA || b.id - a.id;
+              })
+              .map(rec => (
               <div key={rec.id} className="glass-card animate-fade-in" style={{
                 padding: '1.5rem',
                 borderLeft: `4px solid ${getPriorityColor(rec.priority)}`,

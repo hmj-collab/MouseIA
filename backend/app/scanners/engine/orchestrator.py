@@ -29,13 +29,33 @@ class ScannerOrchestrator:
         """
         Executes all active and available scanner providers.
         """
+        scan_type = (scan_type or "todos").lower()
         signals = []
         log_callback("INFO", f"Orquestrador de Scans inicializado para {target_url}...")
 
         for provider in self.providers:
             # Filter based on scan type selection
-            if scan_type == "wordpress" and provider.name not in ("wpscan", "security_headers", "whatweb"):
-                continue
+            if scan_type == "wordpress":
+                if provider.name not in ("wpscan", "security_headers", "whatweb"):
+                    continue
+            elif scan_type == "headers":
+                if provider.name not in ("security_headers", "whatweb"):
+                    continue
+            elif scan_type in ("nmap", "port-scan"):
+                if provider.name != "nmap":
+                    continue
+            elif scan_type in ("tls-ssl", "testssl"):
+                if provider.name != "testssl":
+                    continue
+            elif scan_type == "nuclei":
+                if provider.name != "nuclei":
+                    continue
+            elif scan_type == "nikto":
+                if provider.name != "nikto":
+                    continue
+            elif scan_type in ("all", "todos"):
+                # Run all providers
+                pass
 
             log_callback("INFO", f"Verificando disponibilidade do scanner: {provider.name}...")
             if not provider.is_available():
